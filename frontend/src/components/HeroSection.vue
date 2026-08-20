@@ -1,5 +1,6 @@
 ﻿<script setup lang="ts">
 import { HERO_IMG } from '../data/posts'
+import MediaCover from './MediaCover.vue'
 
 defineEmits<{
   'read-more': []
@@ -18,7 +19,7 @@ const particles = [
 <template>
   <section class="hero">
     <div class="hero__bg">
-      <img :src="HERO_IMG" alt="新海诚风格黄昏天空" />
+      <MediaCover :src="HERO_IMG" alt="黄昏天空" label="星野文记" seed="hero" />
     </div>
     <div class="hero__grad-v" />
     <div class="hero__grad-h" />
@@ -110,11 +111,8 @@ const particles = [
   inset: 0;
   background: var(--color-card);
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+  :deep(.media-cover__img),
+  :deep(.media-cover__ph) {
     filter: saturate(1.15) brightness(0.55);
   }
 }

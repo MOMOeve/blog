@@ -1,7 +1,8 @@
 ﻿import type { Post } from '../types'
 
-export const HERO_IMG =
-  'https://images.unsplash.com/photo-1783152982779-b41307148345?w=1800&h=900&fit=crop&auto=format'
+/** 本地 Hero（与 Django seed_content 同步到 /media/site/） */
+export const HERO_IMG = '/media/site/hero.svg'
+export const AVATAR_IMG = '/media/site/avatar.svg'
 
 export const posts: Post[] = [
   {
@@ -13,7 +14,7 @@ export const posts: Post[] = [
     readTime: '10 分钟',
     excerpt:
       '花了两周时间把一个积累了三年的 JavaScript 项目迁移到 TypeScript。过程痛苦，结果值得——不只是类型安全，更是一次强迫自己重新理解整个代码结构的机会。',
-    img: 'https://images.unsplash.com/photo-1783152982779-b41307148345?w=900&h=500&fit=crop&auto=format',
+    img: '/media/covers/typescript-rewrite.svg',
     featured: true,
     tags: ['代码', 'TypeScript'],
   },
@@ -26,7 +27,7 @@ export const posts: Post[] = [
     readTime: '8 分钟',
     excerpt:
       '备考六个月，刷了三套真题，最后以 142 分通过。回头看，有些方法确实有效，有些完全是在浪费时间。这篇写给同样在准备 N2 的你。',
-    img: 'https://images.unsplash.com/photo-1634896974114-cadd2782d5bc?w=700&h=420&fit=crop&auto=format',
+    img: '/media/covers/jlpt-n2.svg',
     tags: ['语言', 'JLPT'],
   },
   {
@@ -38,7 +39,7 @@ export const posts: Post[] = [
     readTime: '5 分钟',
     excerpt:
       '凌晨两点，一个 bug 终于复现了。窗外的城市安静下来，屏幕的光是房间里唯一的颜色。这种时刻有一种奇怪的专注，像是整个世界只剩下你和这段代码。',
-    img: 'https://images.unsplash.com/photo-1501420264597-23296a7e6a46?w=700&h=420&fit=crop&auto=format',
+    img: '/media/covers/code-at-2am.svg',
     tags: ['生活', '随笔'],
   },
   {
@@ -50,7 +51,7 @@ export const posts: Post[] = [
     readTime: '7 分钟',
     excerpt:
       '不是说 Redux 不好，而是对于中型项目，它的样板代码确实太多了。Zustand 让我写得更少，想得更清楚。附上迁移过程中踩过的几个坑。',
-    img: 'https://images.unsplash.com/photo-1512641406448-6574e777bec6?w=700&h=420&fit=crop&auto=format',
+    img: '/media/covers/zustand.svg',
     tags: ['代码', 'React'],
   },
   {
@@ -62,7 +63,7 @@ export const posts: Post[] = [
     readTime: '4 分钟',
     excerpt:
       '学语言和写代码有一个共同点：你以为你理解了，直到你试着用它解释一件事，才发现自己其实一知半解。语言学习就像 debug，总在意想不到的地方出错。',
-    img: 'https://images.unsplash.com/photo-1415025148099-17fe74102b28?w=700&h=420&fit=crop&auto=format',
+    img: '/media/covers/naming-joke.svg',
     tags: ['语言', '随笔'],
   },
   {
@@ -74,7 +75,7 @@ export const posts: Post[] = [
     readTime: '12 分钟',
     excerpt:
       '从想法到上线用了四十天。技术栈选择、数据库设计、部署踩坑，以及最后没人用的轻微沮丧——全都记在这里了。',
-    img: 'https://images.unsplash.com/photo-1785680975815-59f143d1479d?w=700&h=420&fit=crop&auto=format',
+    img: '/media/covers/side-project.svg',
     tags: ['代码', '项目'],
   },
 ]
@@ -90,7 +91,7 @@ export const allPosts: Post[] = [
     readTime: '6 分钟',
     excerpt:
       'Anki 不是万能的，但它确实改变了我记单词的方式。间隔重复这件事一旦理解了原理，就很难再用其他方法。聊聊我怎么建牌、怎么坚持的。',
-    img: 'https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=800&h=480&fit=crop&auto=format',
+    img: '/media/covers/anki-review.svg',
     tags: ['语言', '工具'],
   },
   {
@@ -102,7 +103,7 @@ export const allPosts: Post[] = [
     readTime: '9 分钟',
     excerpt:
       'Terminal、编辑器、常用工具、字体、主题……每隔一段时间整理一次自己的开发环境，其实也是一次审视自己工作习惯的机会。',
-    img: 'https://images.unsplash.com/photo-1556811246-b2d9eb3fbad0?w=800&h=480&fit=crop&auto=format',
+    img: '/media/covers/dev-setup-2026.svg',
     tags: ['代码', '工具'],
   },
   {
@@ -114,7 +115,7 @@ export const allPosts: Post[] = [
     readTime: '11 分钟',
     excerpt:
       '「〜ところだ」和「〜ばかりだ」到底有什么区别？学语言的人都懂那种感觉：每搞懂一个文法，就又发现一个更令人头大的。但这就是乐趣所在。',
-    img: 'https://images.unsplash.com/photo-1504493408076-2017927bbb1a?w=800&h=480&fit=crop&auto=format',
+    img: '/media/covers/n3-grammar.svg',
     tags: ['语言', '文法'],
   },
 ]

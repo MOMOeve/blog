@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
-import { posts, sidebarTags } from '../data/posts'
+import { posts, sidebarTags, AVATAR_IMG } from '../data/posts'
 import { useRouter } from '../router'
+import MediaCover from './MediaCover.vue'
 
 const { push, paths } = useRouter()
 const recent = posts.slice(0, 3)
@@ -10,10 +11,7 @@ const recent = posts.slice(0, 3)
   <aside class="sidebar">
     <div class="sidebar__profile">
       <div class="sidebar__avatar">
-        <img
-          src="https://images.unsplash.com/photo-1432847712612-926caafaa802?w=64&h=64&fit=crop&auto=format"
-          alt="作者头像"
-        />
+        <MediaCover :src="AVATAR_IMG" alt="作者头像" label="星野凛" seed="avatar" />
       </div>
       <h4 class="font-display">星野凛</h4>
       <p class="font-body">代码 · 语言 · 生活记录</p>
@@ -31,7 +29,7 @@ const recent = posts.slice(0, 3)
       <ul class="sidebar__recent">
         <li v-for="p in recent" :key="p.id" class="sidebar__recent-item">
           <div class="thumb">
-            <img :src="p.img" :alt="p.title" />
+            <MediaCover :src="p.img" :alt="p.title" :label="p.title" :seed="p.id" />
           </div>
           <div>
             <p class="font-display">{{ p.title }}</p>
@@ -103,11 +101,9 @@ const recent = posts.slice(0, 3)
   box-shadow: 0 0 0 1px rgba(245, 200, 66, 0.3);
   background: var(--color-card);
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.8;
+  :deep(.media-cover__img),
+  :deep(.media-cover__ph) {
+    opacity: 0.85;
   }
 }
 
@@ -180,12 +176,19 @@ const recent = posts.slice(0, 3)
     overflow: hidden;
     background: var(--color-card);
 
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.7;
+    :deep(.media-cover__img),
+    :deep(.media-cover__ph) {
+      opacity: 0.75;
       transition: opacity 0.2s;
+    }
+
+    :deep(.media-cover__ph) {
+      min-height: 0;
+    }
+
+    :deep(.media-cover__label) {
+      font-size: 0.55rem;
+      letter-spacing: 0.06em;
     }
   }
 

@@ -1,4 +1,7 @@
 ﻿<script setup lang="ts">
+import { AVATAR_IMG } from '../data/posts'
+import MediaCover from '../components/MediaCover.vue'
+
 const timeline = [
   {
     year: '2020',
@@ -94,10 +97,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
       <div class="about__layout">
         <div class="about__aside">
           <div class="about__avatar">
-            <img
-              src="https://images.unsplash.com/photo-1569150219201-a51caac04011?w=400&h=400&fit=crop&auto=format"
-              alt="作者"
-            />
+            <MediaCover :src="AVATAR_IMG" alt="作者" label="星野凛" seed="avatar" />
           </div>
           <div class="about__identity">
             <h2 class="font-display">星野 凛</h2>

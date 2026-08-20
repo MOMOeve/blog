@@ -5,6 +5,7 @@ import type { Post } from '../types'
 import { useAuth } from '../composables/useAuth'
 import { renderMarkdown } from '../utils/markdown'
 import { useRouter } from '../router'
+import MediaCover from '../components/MediaCover.vue'
 
 const { isStaff } = useAuth()
 const { route, push, paths } = useRouter()
@@ -82,8 +83,8 @@ watch(postId, () => {
         <h1 class="detail__title font-display">{{ post.title }}</h1>
         <p class="detail__en font-serif">{{ post.titleEn }}</p>
 
-        <div v-if="post.img" class="detail__cover img-overlay">
-          <img :src="post.img" :alt="post.title" />
+        <div class="detail__cover img-overlay">
+          <MediaCover :src="post.img" :alt="post.title" :label="post.title" :seed="post.id" />
         </div>
 
         <p class="detail__excerpt font-body">{{ post.excerpt }}</p>
@@ -177,12 +178,11 @@ watch(postId, () => {
   margin-bottom: 1.75rem;
   overflow: hidden;
   background: var(--color-card);
+  height: min(26rem, 50vw);
+  min-height: 12rem;
 
-  img {
-    width: 100%;
-    max-height: 26rem;
-    object-fit: cover;
-    display: block;
+  :deep(.media-cover__ph) {
+    min-height: 12rem;
   }
 }
 

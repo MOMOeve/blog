@@ -7,21 +7,48 @@ blog/
   frontend/   # Vue 3 + TypeScript + Less + Vite
   backend/    # Django 5 + DRF + JWT
   docs/       # API 约定与部署说明
+  start.py    # 一键启动前后端
 ```
 
 ## 功能
 
 - 首页 / 文章列表 / 文章详情（Markdown 渲染）
-- 摄影画廊（mediahub，图片走本地 `/media`）
-- 登录（JWT）、深浅主题
+- 摄影画廊（mediahub）
+- 登录（JWT）、深浅主题切换
 - Staff：写文章、编辑、草稿箱、封面/插图上传
-- 独立 URL，可分享、可刷新
+- 独立 URL（可分享、可刷新）
+- 图片本地存储；无图或加载失败时用渐变色块占位（`MediaCover`）
+
+## 图片与媒体
+
+| 类型 | 路径 |
+|------|------|
+| 文章封面（种子） | `/media/covers/*.svg` |
+| 摄影（种子） | `/media/photos/*.svg` |
+| 站点 Hero / 头像 | `/media/site/hero.svg`、`avatar.svg` |
+| 用户上传 | `/media/uploads/年/月/` |
+
+- 文件落在 `backend/media/`；开发时 Vite 代理 `/media` → Django
+- `seed_content` / `seed_photos` 会生成本地 SVG，并同步到 `frontend/public/media/`
+- 上传：`POST /api/v1/uploads/`（staff，multipart 字段 `file`，≤5MB）
 
 ## 快速启动
 
 需同时跑后端（8000）和前端（5173）。
 
-### 1. 后端
+### 一键启动（推荐）
+
+先完成下方「首次准备」，之后在项目根目录执行：
+
+```bash
+python start.py
+```
+
+按 `Ctrl+C` 可同时停止前后端。
+
+### 首次准备
+
+#### 1. 后端
 
 ```bash
 cd backend
@@ -32,7 +59,6 @@ copy .env.example .env
 python manage.py migrate
 python manage.py seed_content
 python manage.py seed_photos
-python manage.py runserver 8000
 ```
 
 - Swagger：http://127.0.0.1:8000/api/docs/
@@ -40,15 +66,27 @@ python manage.py runserver 8000
 
 演示账号（staff）：`demo@example.com` / `demo1234`
 
-### 2. 前端
+#### 2. 前端
 
 ```bash
 cd frontend
 npm install
-npm run dev
+copy .env.example .env
 ```
 
 打开 http://localhost:5173/ 。Vite 会把 `/api`、`/media` 代理到 Django。
+
+#### 3. 手动分别启动（可选）
+
+```bash
+# 终端 1
+cd backend
+.\.venv\Scripts\python manage.py runserver 8000
+
+# 终端 2
+cd frontend
+npm run dev
+```
 
 ## 页面路径
 
@@ -88,7 +126,7 @@ npm run dev
 
 ## 剩余计划
 
-已完成：图片上传、独立 URL、草稿箱、Markdown 写作。建议按下面顺序继续。
+已完成：图片上传、独立 URL、草稿箱、Markdown 写作、本地媒体、色块占位。
 
 ### 优先（现有半成品）
 

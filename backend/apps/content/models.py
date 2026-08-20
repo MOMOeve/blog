@@ -45,7 +45,7 @@ class Post(models.Model):
     tags = models.ManyToManyField(Tag, blank=True, related_name='posts', verbose_name='标签')
     excerpt = models.TextField('摘要')
     body = models.TextField('正文', blank=True)
-    cover_image = models.URLField('封面图', blank=True)
+    cover_image = models.CharField('封面图', max_length=500, blank=True)
     read_time = models.CharField('阅读时长', max_length=32, default='5 分钟')
     featured = models.BooleanField('精选', default=False)
     published = models.BooleanField('已发布', default=True)

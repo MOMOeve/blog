@@ -1,5 +1,6 @@
 ﻿<script setup lang="ts">
 import type { Post } from '../types'
+import MediaCover from './MediaCover.vue'
 
 withDefaults(
   defineProps<{
@@ -22,7 +23,7 @@ function truncate(text: string, len: number) {
   <article v-if="featured" class="featured card-hover" @click="emit('select', post)">
     <div class="featured__grid">
       <div class="img-overlay featured__media">
-        <img :src="post.img" :alt="post.title" />
+        <MediaCover :src="post.img" :alt="post.title" :label="post.title" :seed="post.id" />
       </div>
       <div class="featured__body">
         <div class="featured__meta">
@@ -52,7 +53,7 @@ function truncate(text: string, len: number) {
 
   <article v-else class="card card-hover" @click="emit('select', post)">
     <div class="img-overlay card__media">
-      <img :src="post.img" :alt="post.title" />
+      <MediaCover :src="post.img" :alt="post.title" :label="post.title" :seed="post.id" />
       <div class="card__badge">
         <span class="tag-pill">{{ post.category }}</span>
       </div>
@@ -83,7 +84,9 @@ function truncate(text: string, len: number) {
       color: var(--color-primary);
     }
 
-    img {
+    img,
+    :deep(.media-cover__img),
+    :deep(.media-cover__ph) {
       opacity: 0.95;
       transform: scale(1.02);
     }
@@ -107,12 +110,10 @@ function truncate(text: string, len: number) {
     min-height: 16rem;
   }
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.8;
-    filter: saturate(1.1) brightness(0.9);
+  :deep(.media-cover__img),
+  :deep(.media-cover__ph) {
+    opacity: 0.88;
+    filter: saturate(1.1) brightness(0.95);
     transition: all 0.7s;
   }
 }
@@ -224,7 +225,8 @@ function truncate(text: string, len: number) {
       color: var(--color-primary);
     }
 
-    img {
+    :deep(.media-cover__img),
+    :deep(.media-cover__ph) {
       opacity: 0.9;
       transform: scale(1.03);
     }
@@ -236,12 +238,10 @@ function truncate(text: string, len: number) {
   background: var(--color-card);
   flex-shrink: 0;
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.75;
-    filter: saturate(1.1) brightness(0.85);
+  :deep(.media-cover__img),
+  :deep(.media-cover__ph) {
+    opacity: 0.85;
+    filter: saturate(1.1) brightness(0.92);
     transition: all 0.7s;
   }
 }

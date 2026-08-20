@@ -46,6 +46,12 @@ Staff 可用 `?published=false` 获取草稿列表；`ordering=-updated_at` 按�
 
 上传限制：jpg/png/webp/gif/svg，最大 5MB；文件存 `media/uploads/年/月/`。
 
+种子本地图：
+
+- 文章封面：`/media/covers/*.svg`
+- 摄影：`/media/photos/*.svg`
+- 站点：`/media/site/hero.svg`、`/media/site/avatar.svg`
+
 OpenAPI：`/api/docs/`
 
 ## 演示账号

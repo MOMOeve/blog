@@ -4,8 +4,9 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from apps.mediahub.models import Photo
+from apps.mediahub.placeholders import sync_to_frontend_public, write_placeholder_svg
 
-# 本地 SVG 占位图（避免依赖 Unsplash 等外网图床）
+# 本地 SVG 占位图（不依赖外网图床）
 SEED_PHOTOS = [
     {
         'slug': 'fuji',
@@ -109,28 +110,6 @@ SEED_PHOTOS = [
 ]
 
 
-def write_placeholder_svg(path: Path, title: str, aspect: str, colors: tuple[str, str, str]) -> None:
-    w, h = (900, 600) if aspect == 'landscape' else (600, 900)
-    c0, c1, c2 = colors
-    path.parent.mkdir(parents=True, exist_ok=True)
-    svg = f'''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">
-  <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="{c0}"/>
-      <stop offset="55%" stop-color="{c1}"/>
-      <stop offset="100%" stop-color="{c2}"/>
-    </linearGradient>
-  </defs>
-  <rect width="{w}" height="{h}" fill="url(#g)"/>
-  <circle cx="{w * 0.78}" cy="{h * 0.22}" r="{min(w, h) * 0.12}" fill="{c2}" opacity="0.35"/>
-  <text x="50%" y="52%" text-anchor="middle" fill="#f0f4ff" font-family="Segoe UI, sans-serif"
-        font-size="{28 if aspect == 'landscape' else 24}" opacity="0.92">{title}</text>
-</svg>
-'''
-    path.write_text(svg, encoding='utf-8')
-
-
 class Command(BaseCommand):
     help = '导入演示摄影数据（生成本地占位图）'
 
@@ -139,12 +118,10 @@ class Command(BaseCommand):
         for item in SEED_PHOTOS:
             slug = item['slug']
             filename = f'{slug}.svg'
-            write_placeholder_svg(
-                media_dir / filename,
-                item['title'],
-                item['aspect'],
-                item['colors'],
-            )
+            path = media_dir / filename
+            w, h = (900, 600) if item['aspect'] == 'landscape' else (600, 900)
+            write_placeholder_svg(path, item['title'], width=w, height=h, colors=item['colors'])
+            sync_to_frontend_public(path, f'photos/{filename}')
             photo, created = Photo.objects.update_or_create(
                 title=item['title'],
                 defaults={

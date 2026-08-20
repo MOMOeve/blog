@@ -1,5 +1,7 @@
 ﻿<script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { AVATAR_IMG } from '../data/posts'
+import MediaCover from '../components/MediaCover.vue'
 
 type FormState = 'idle' | 'sending' | 'sent'
 
@@ -131,10 +133,7 @@ function resetForm() {
             </p>
             <div class="aside__author">
               <div class="aside__avatar">
-                <img
-                  src="https://images.unsplash.com/photo-1569150219201-a51caac04011?w=56&h=56&fit=crop&auto=format"
-                  alt="星野凛"
-                />
+                <MediaCover :src="AVATAR_IMG" alt="星野凛" label="星野凛" seed="avatar" />
               </div>
               <div>
                 <p class="font-display">星野 凛</p>

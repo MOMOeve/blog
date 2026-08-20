@@ -21,7 +21,7 @@ class PostListSerializer(serializers.ModelSerializer):
     date = serializers.SerializerMethodField()
     readTime = serializers.CharField(source='read_time')
     titleEn = serializers.CharField(source='title_en')
-    img = serializers.CharField(source='cover_image')
+    img = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -44,6 +44,13 @@ class PostListSerializer(serializers.ModelSerializer):
         if not dt:
             return ''
         return f'{dt.year}年{dt.month}月{dt.day}日'
+
+    def get_img(self, obj: Post) -> str:
+        url = obj.cover_image or ''
+        request = self.context.get('request')
+        if request and url.startswith('/'):
+            return request.build_absolute_uri(url)
+        return url
 
 
 class PostDetailSerializer(PostListSerializer):

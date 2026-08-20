@@ -5,6 +5,7 @@ import { fetchCategoryNames, fetchPosts } from '../api/posts'
 import type { Post } from '../types'
 import { useAuth } from '../composables/useAuth'
 import { useRouter } from '../router'
+import MediaCover from '../components/MediaCover.vue'
 
 type ViewMode = 'grid' | 'list'
 type SortBy = 'newest' | 'oldest'
@@ -179,7 +180,7 @@ function clearFilters() {
       <div v-else-if="viewMode === 'grid'" class="articles__grid">
         <article v-for="post in filtered" :key="post.id" class="grid-card" @click="push(paths.article(post.id))">
           <div class="grid-card__media">
-            <img :src="post.img" :alt="post.title" />
+            <MediaCover :src="post.img" :alt="post.title" :label="post.title" :seed="post.id" />
             <span class="font-body">{{ post.category }}</span>
           </div>
           <div class="grid-card__body">
@@ -197,7 +198,7 @@ function clearFilters() {
       <div v-else class="articles__list">
         <article v-for="post in filtered" :key="post.id" class="list-row" @click="push(paths.article(post.id))">
           <div class="list-row__thumb">
-            <img :src="post.img" :alt="post.title" />
+            <MediaCover :src="post.img" :alt="post.title" :label="post.title" :seed="post.id" />
           </div>
           <div class="list-row__body">
             <div class="list-row__meta font-body">
@@ -405,11 +406,9 @@ select {
   overflow: hidden;
   background: var(--color-card);
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.7;
+  :deep(.media-cover__img),
+  :deep(.media-cover__ph) {
+    opacity: 0.75;
     filter: saturate(1.1);
     transition: all 0.7s;
   }
@@ -432,6 +431,7 @@ select {
     position: absolute;
     inset: 0;
     background: linear-gradient(180deg, transparent 40%, rgba(18, 26, 46, 0.8));
+    pointer-events: none;
   }
 }
 
@@ -517,11 +517,9 @@ select {
   overflow: hidden;
   background: var(--color-card);
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.65;
+  :deep(.media-cover__img),
+  :deep(.media-cover__ph) {
+    opacity: 0.7;
     transition: opacity 0.4s;
   }
 }

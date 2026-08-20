@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { photoCategories as fallbackCategories, photos as fallbackPhotos } from '../data/photos'
 import { fetchPhotoCategories, fetchPhotos } from '../api/photos'
 import type { Photo } from '../types'
+import MediaCover from '../components/MediaCover.vue'
 
 const activeCategory = ref('全部')
 const lightboxPhoto = ref<Photo | null>(null)
@@ -13,11 +14,6 @@ const useRemote = ref(false)
 const filtered = computed(() =>
   photos.value.filter((p) => activeCategory.value === '全部' || p.category === activeCategory.value),
 )
-
-function lightboxSrc(img: string) {
-  if (!img.includes('unsplash.com')) return img
-  return img.replace('w=900', 'w=1200').replace('w=600', 'w=800')
-}
 
 async function loadPhotos() {
   try {
@@ -83,8 +79,8 @@ watch(activeCategory, () => {
           class="photo-card"
           @click="lightboxPhoto = photo"
         >
-          <div class="photo-card__media">
-            <img :src="photo.img" :alt="photo.title" />
+          <div class="photo-card__media" :class="photo.aspect">
+            <MediaCover :src="photo.img" :alt="photo.title" :label="photo.title" :seed="photo.id" />
           </div>
           <div class="photo-card__overlay">
             <h3 class="font-display">{{ photo.title }}</h3>
@@ -121,7 +117,12 @@ watch(activeCategory, () => {
 
       <div class="lightbox__panel" @click.stop>
         <div class="lightbox__image">
-          <img :src="lightboxSrc(lightboxPhoto.img)" :alt="lightboxPhoto.title" />
+          <MediaCover
+            :src="lightboxPhoto.img"
+            :alt="lightboxPhoto.title"
+            :label="lightboxPhoto.title"
+            :seed="lightboxPhoto.id"
+          />
         </div>
         <div class="lightbox__info">
           <span class="font-body">{{ lightboxPhoto.category }}</span>
@@ -188,7 +189,8 @@ watch(activeCategory, () => {
   &:hover {
     border-color: rgba(126, 184, 247, 0.25);
 
-    img {
+    :deep(.media-cover__img),
+    :deep(.media-cover__ph) {
       opacity: 1;
       transform: scale(1.03);
     }
@@ -202,10 +204,14 @@ watch(activeCategory, () => {
 
 .photo-card__media {
   background: var(--color-card);
+  aspect-ratio: 3 / 2;
 
-  img {
-    width: 100%;
-    object-fit: cover;
+  &.portrait {
+    aspect-ratio: 2 / 3;
+  }
+
+  :deep(.media-cover__img),
+  :deep(.media-cover__ph) {
     opacity: 0.92;
     filter: saturate(1.05) brightness(1);
     transition: all 0.7s;
@@ -308,14 +314,17 @@ watch(activeCategory, () => {
 .lightbox__image {
   flex: 1;
   max-height: 75vh;
+  min-height: 16rem;
   overflow: hidden;
   border: 1px solid rgba(126, 184, 247, 0.12);
 
-  img {
-    width: 100%;
-    height: 100%;
+  :deep(.media-cover__img) {
     object-fit: contain;
     filter: saturate(1.1) brightness(0.95);
+  }
+
+  :deep(.media-cover__ph) {
+    min-height: 16rem;
   }
 }
 

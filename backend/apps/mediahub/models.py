@@ -10,7 +10,7 @@ class Photo(models.Model):
     title = models.CharField('标题', max_length=120)
     location = models.CharField('地点', max_length=120, blank=True)
     taken_on = models.CharField('拍摄时间文案', max_length=64, blank=True)
-    image_url = models.URLField('图片地址')
+    image_url = models.CharField('图片地址', max_length=500)
     aspect = models.CharField('比例', max_length=16, choices=ASPECT_CHOICES, default='landscape')
     category = models.CharField('分类', max_length=32, db_index=True)
     description = models.TextField('描述', blank=True)
