@@ -10,8 +10,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=(bool, True),
     USE_MYSQL=(bool, False),
+    USE_X_FORWARDED_HOST=(bool, False),
     ALLOWED_HOSTS=(list, ['localhost', '127.0.0.1']),
     CORS_ALLOWED_ORIGINS=(list, ['http://localhost:5173', 'http://127.0.0.1:5173']),
+    CSRF_TRUSTED_ORIGINS=(list, [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:8080',
+        'http://127.0.0.1:8080',
+        'http://localhost',
+        'http://127.0.0.1',
+    ]),
 )
 
 environ.Env.read_env(BASE_DIR / '.env')
@@ -37,6 +46,7 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.content',
     'apps.mediahub',
+    'apps.inbox',
 ]
 
 MIDDLEWARE = [
@@ -89,6 +99,16 @@ else:
         }
     }
 
+import sys
+
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -110,6 +130,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
+USE_X_FORWARDED_HOST = env('USE_X_FORWARDED_HOST')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -136,3 +159,10 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Vue frontend + Django DRF backend',
     'VERSION': '1.0.0',
 }
+
+EMAIL_BACKEND = env(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend',
+)
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@hoshino.local')
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:8080')

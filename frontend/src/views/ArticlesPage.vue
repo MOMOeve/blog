@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { allPosts as fallbackPosts, categories as fallbackCategories } from '../data/posts'
-import { fetchCategoryNames, fetchPosts } from '../api/posts'
+import { fetchArchive, fetchCategoryNames, fetchPostsPage, fetchTagCloud, POSTS_PAGE_SIZE, type ArchiveItem, type TagCloudItem } from '../api/posts'
 import type { Post } from '../types'
 import { useAuth } from '../composables/useAuth'
 import { useRouter } from '../router'
@@ -10,18 +10,50 @@ import MediaCover from '../components/MediaCover.vue'
 type ViewMode = 'grid' | 'list'
 type SortBy = 'newest' | 'oldest'
 
-const { isStaff } = useAuth()
-const { push, paths } = useRouter()
+const { isAuthor } = useAuth()
+const { push, paths, route } = useRouter()
 
 const activeCategory = ref('全部')
+const activeTag = ref('')
+const activeYear = ref<number | null>(null)
+const activeMonth = ref<number | null>(null)
 const searchQuery = ref('')
 const viewMode = ref<ViewMode>('grid')
 const sortBy = ref<SortBy>('newest')
+const currentPage = ref(1)
+const totalCount = ref(0)
 const posts = ref<Post[]>(fallbackPosts)
 const categories = ref<string[]>(fallbackCategories)
 const useRemote = ref(false)
+const loading = ref(false)
+const tagCloud = ref<TagCloudItem[]>([])
+const archive = ref<ArchiveItem[]>([])
+
+function readUrlState() {
+  const params = new URLSearchParams(window.location.search)
+  searchQuery.value = params.get('search') ?? ''
+  activeTag.value = params.get('tag') ?? ''
+  activeYear.value = params.get('year') ? Number(params.get('year')) : null
+  activeMonth.value = params.get('month') ? Number(params.get('month')) : null
+  currentPage.value = Math.max(1, Number(params.get('page') || 1))
+}
+
+function syncUrl() {
+  const params = new URLSearchParams()
+  if (searchQuery.value.trim()) params.set('search', searchQuery.value.trim())
+  if (activeTag.value) params.set('tag', activeTag.value)
+  if (activeYear.value) params.set('year', String(activeYear.value))
+  if (activeMonth.value) params.set('month', String(activeMonth.value))
+  if (currentPage.value > 1) params.set('page', String(currentPage.value))
+  const qs = params.toString()
+  const path = qs ? `/articles?${qs}` : '/articles'
+  if (`${window.location.pathname}${window.location.search}` !== path) {
+    history.replaceState(null, '', path)
+  }
+}
 
 const filtered = computed(() => {
+  if (useRemote.value) return posts.value
   let result = posts.value.filter((p) => {
     const matchCat = activeCategory.value === '全部' || p.category === activeCategory.value
     const q = searchQuery.value
@@ -33,39 +65,126 @@ const filtered = computed(() => {
   return result
 })
 
+const totalPages = computed(() =>
+  useRemote.value ? Math.max(1, Math.ceil(totalCount.value / POSTS_PAGE_SIZE)) : 1,
+)
+
+const displayCount = computed(() => (useRemote.value ? totalCount.value : filtered.value.length))
+
+const pageNumbers = computed(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+  const pages: number[] = []
+  const start = Math.max(1, current - 2)
+  const end = Math.min(total, current + 2)
+  for (let i = start; i <= end; i += 1) pages.push(i)
+  return pages
+})
+
 async function loadPosts() {
+  loading.value = true
   try {
-    const remote = await fetchPosts({
+    const data = await fetchPostsPage({
       category: activeCategory.value,
+      tag: activeTag.value || undefined,
+      year: activeYear.value ?? undefined,
+      month: activeMonth.value ?? undefined,
       search: searchQuery.value || undefined,
       ordering: sortBy.value === 'oldest' ? 'published_at' : '-published_at',
+      page: currentPage.value,
     })
-    if (remote.length || useRemote.value) {
-      posts.value = remote
+    if (data.results.length || useRemote.value || data.count > 0) {
+      posts.value = data.results
+      totalCount.value = data.count
       useRemote.value = true
     }
   } catch {
     /* keep fallback */
+  } finally {
+    loading.value = false
   }
 }
 
 onMounted(async () => {
+  readUrlState()
   try {
-    const names = await fetchCategoryNames()
+    const [names, tags, months] = await Promise.all([
+      fetchCategoryNames(),
+      fetchTagCloud(),
+      fetchArchive(),
+    ])
     if (names.length) categories.value = names
+    tagCloud.value = tags
+    archive.value = months
   } catch {
     /* keep fallback */
   }
   await loadPosts()
 })
 
-watch([activeCategory, searchQuery, sortBy], () => {
-  if (useRemote.value) void loadPosts()
+watch(route, (r) => {
+  if (r.name !== 'articles') return
+  readUrlState()
+  void loadPosts()
+})
+
+watch([activeCategory, activeTag, activeYear, activeMonth, searchQuery, sortBy], () => {
+  if (!useRemote.value) return
+  currentPage.value = 1
+  syncUrl()
+  void loadPosts()
+})
+
+watch(currentPage, () => {
+  if (!useRemote.value) return
+  syncUrl()
+  void loadPosts()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 })
 
 function clearFilters() {
   searchQuery.value = ''
   activeCategory.value = '全部'
+  activeTag.value = ''
+  activeYear.value = null
+  activeMonth.value = null
+  currentPage.value = 1
+  syncUrl()
+  if (useRemote.value) void loadPosts()
+}
+
+function selectTag(name: string) {
+  activeTag.value = activeTag.value === name ? '' : name
+  activeYear.value = null
+  activeMonth.value = null
+  currentPage.value = 1
+  syncUrl()
+  if (useRemote.value) void loadPosts()
+}
+
+function selectArchive(year: number, month: number) {
+  const same = activeYear.value === year && activeMonth.value === month
+  activeYear.value = same ? null : year
+  activeMonth.value = same ? null : month
+  activeTag.value = ''
+  currentPage.value = 1
+  syncUrl()
+  if (useRemote.value) void loadPosts()
+}
+
+const archiveByYear = computed(() => {
+  const map = new Map<number, ArchiveItem[]>()
+  for (const item of archive.value) {
+    const list = map.get(item.year) ?? []
+    list.push(item)
+    map.set(item.year, list)
+  }
+  return [...map.entries()].sort((a, b) => b[0] - a[0])
+})
+
+function goToPage(page: number) {
+  if (page < 1 || page > totalPages.value || page === currentPage.value) return
+  currentPage.value = page
 }
 </script>
 
@@ -81,10 +200,10 @@ function clearFilters() {
           <span class="page-title__sub">· 所有文字</span>
         </h1>
         <p class="page-desc animate-fade-up-delay-2">
-          共 {{ posts.length }} 篇文章，关于代码、语言与那些值得记下来的日子
+          共 {{ displayCount }} 篇文章，关于代码、语言与那些值得记下来的日子
         </p>
         <button
-          v-if="isStaff"
+          v-if="isAuthor"
           type="button"
           class="articles__write font-body animate-fade-up-delay-2"
           @click="push(paths.drafts())"
@@ -92,7 +211,7 @@ function clearFilters() {
           草稿箱
         </button>
         <button
-          v-if="isStaff"
+          v-if="isAuthor"
           type="button"
           class="articles__write font-body animate-fade-up-delay-2"
           @click="push(paths.write())"
@@ -167,12 +286,55 @@ function clearFilters() {
         </div>
       </div>
 
-      <p v-if="searchQuery || activeCategory !== '全部'" class="articles__count font-body">
-        找到 {{ filtered.length }} 篇文章
+      <div class="articles__layout">
+        <aside v-if="tagCloud.length || archiveByYear.length" class="articles__sidebar">
+          <section v-if="tagCloud.length" class="articles__side-block">
+            <h3 class="font-display">标签云</h3>
+            <div class="articles__tags">
+              <button
+                v-for="tag in tagCloud"
+                :key="tag.name"
+                type="button"
+                class="font-body"
+                :class="{ 'is-active': activeTag === tag.name }"
+                :style="{ fontSize: `${0.65 + Math.min(tag.count, 10) * 0.04}rem` }"
+                @click="selectTag(tag.name)"
+              >
+                {{ tag.name }} ({{ tag.count }})
+              </button>
+            </div>
+          </section>
+          <section v-if="archiveByYear.length" class="articles__side-block">
+            <h3 class="font-display">归档</h3>
+            <div v-for="[year, months] in archiveByYear" :key="year" class="articles__archive-year">
+              <p class="articles__archive-year-label font-body">{{ year }}</p>
+              <div class="articles__archive-months">
+                <button
+                  v-for="item in months"
+                  :key="`${item.year}-${item.month}`"
+                  type="button"
+                  class="font-body"
+                  :class="{ 'is-active': activeYear === item.year && activeMonth === item.month }"
+                  @click="selectArchive(item.year, item.month)"
+                >
+                  {{ item.month }}月 ({{ item.count }})
+                </button>
+              </div>
+            </div>
+          </section>
+        </aside>
+
+        <div class="articles__main">
+      <p v-if="searchQuery || activeCategory !== '全部' || activeTag || activeYear" class="articles__count font-body">
+        找到 {{ displayCount }} 篇文章
         <span v-if="searchQuery">「{{ searchQuery }}」</span>
+        <span v-if="activeTag"> · 标签 {{ activeTag }}</span>
+        <span v-if="activeYear"> · {{ activeYear }}年{{ activeMonth }}月</span>
       </p>
 
-      <div v-if="!filtered.length" class="articles__empty">
+      <p v-if="loading" class="articles__loading font-body">加载中…</p>
+
+      <div v-else-if="!filtered.length" class="articles__empty">
         <p class="font-display">未找到相关文章</p>
         <button type="button" class="font-body" @click="clearFilters">清除筛选</button>
       </div>
@@ -215,11 +377,120 @@ function clearFilters() {
           </svg>
         </article>
       </div>
+
+      <nav v-if="useRemote && totalPages > 1" class="articles__pagination" aria-label="文章分页">
+        <button
+          type="button"
+          class="font-body"
+          :disabled="currentPage <= 1"
+          @click="goToPage(currentPage - 1)"
+        >
+          上一页
+        </button>
+        <div class="articles__pages">
+          <button
+            v-for="page in pageNumbers"
+            :key="page"
+            type="button"
+            class="font-body"
+            :class="{ 'is-active': page === currentPage }"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        </div>
+        <button
+          type="button"
+          class="font-body"
+          :disabled="currentPage >= totalPages"
+          @click="goToPage(currentPage + 1)"
+        >
+          下一页
+        </button>
+      </nav>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="less">
+.articles__layout {
+  display: grid;
+  gap: 2rem;
+
+  @media (min-width: 960px) {
+    grid-template-columns: 14rem 1fr;
+    align-items: start;
+  }
+}
+
+.articles__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.articles__side-block {
+  h3 {
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    color: var(--color-secondary);
+    margin: 0 0 0.75rem;
+  }
+}
+
+.articles__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  button {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid rgba(126, 184, 247, 0.15);
+    color: var(--color-dim);
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+
+    &.is-active,
+    &:hover {
+      color: var(--color-primary);
+      border-color: rgba(245, 200, 66, 0.35);
+      background: rgba(245, 200, 66, 0.08);
+    }
+  }
+}
+
+.articles__archive-year {
+  margin-bottom: 0.75rem;
+}
+
+.articles__archive-year-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  color: var(--color-muted-fg);
+  letter-spacing: 0.1em;
+}
+
+.articles__archive-months {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+
+  button {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid rgba(126, 184, 247, 0.12);
+    color: var(--color-dim);
+
+    &.is-active,
+    &:hover {
+      color: var(--color-secondary);
+      border-color: rgba(126, 184, 247, 0.35);
+    }
+  }
+}
+
 .articles__controls {
   display: flex;
   flex-direction: column;
@@ -337,6 +608,68 @@ select {
   span {
     color: var(--color-secondary);
     margin-left: 0.25rem;
+  }
+}
+
+.articles__loading {
+  font-size: 0.75rem;
+  color: var(--color-dim);
+  letter-spacing: 0.1em;
+  margin: 0 0 1.5rem;
+}
+
+.articles__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(126, 184, 247, 0.1);
+
+  > button {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--color-secondary);
+    border: 1px solid rgba(126, 184, 247, 0.2);
+    padding: 0.5rem 0.875rem;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      border-color: rgba(126, 184, 247, 0.45);
+      color: var(--color-fg);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.articles__pages {
+  display: flex;
+  gap: 0.35rem;
+
+  button {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--color-dim);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+
+    &:hover {
+      color: var(--color-fg);
+      border-color: rgba(126, 184, 247, 0.2);
+    }
+
+    &.is-active {
+      color: var(--color-primary);
+      border-color: rgba(245, 200, 66, 0.35);
+      background: rgba(245, 200, 66, 0.08);
+    }
   }
 }
 

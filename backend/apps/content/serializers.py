@@ -22,6 +22,8 @@ class PostListSerializer(serializers.ModelSerializer):
     readTime = serializers.CharField(source='read_time')
     titleEn = serializers.CharField(source='title_en')
     img = serializers.SerializerMethodField()
+    viewCount = serializers.IntegerField(source='view_count', read_only=True)
+    likeCount = serializers.IntegerField(source='like_count', read_only=True)
 
     class Meta:
         model = Post
@@ -37,6 +39,8 @@ class PostListSerializer(serializers.ModelSerializer):
             'featured',
             'tags',
             'published',
+            'viewCount',
+            'likeCount',
         ]
 
     def get_date(self, obj: Post) -> str:
@@ -55,9 +59,39 @@ class PostListSerializer(serializers.ModelSerializer):
 
 class PostDetailSerializer(PostListSerializer):
     body = serializers.CharField()
+    liked = serializers.SerializerMethodField()
+    related = serializers.SerializerMethodField()
+    prev = serializers.SerializerMethodField()
+    next = serializers.SerializerMethodField()
 
     class Meta(PostListSerializer.Meta):
-        fields = PostListSerializer.Meta.fields + ['body', 'published']
+        fields = PostListSerializer.Meta.fields + ['body', 'liked', 'related', 'prev', 'next']
+
+    def get_liked(self, obj: Post) -> bool:
+        request = self.context.get('request')
+        if not request:
+            return False
+        from .services import user_has_liked
+
+        return user_has_liked(obj, request)
+
+    def get_related(self, obj: Post):
+        from .services import get_related_posts
+
+        qs = get_related_posts(obj)
+        return PostListSerializer(qs, many=True, context=self.context).data
+
+    def get_prev(self, obj: Post):
+        from .services import get_prev_next, serialize_nav_post
+
+        prev_post, _ = get_prev_next(obj)
+        return serialize_nav_post(prev_post)
+
+    def get_next(self, obj: Post):
+        from .services import get_prev_next, serialize_nav_post
+
+        _, next_post = get_prev_next(obj)
+        return serialize_nav_post(next_post)
 
 
 class PostWriteSerializer(serializers.ModelSerializer):

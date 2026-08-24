@@ -1,44 +1,98 @@
 import { apiFetch } from './client'
-import type { Post } from '../types'
+import type { Comment, Post, PostDetail } from '../types'
 
-interface Paginated<T> {
+export interface PaginatedResult<T> {
   count: number
   next: string | null
   previous: string | null
   results: T[]
 }
 
-export async function fetchPosts(params: {
+export const POSTS_PAGE_SIZE = 12
+
+export interface FetchPostsParams {
   category?: string
+  tag?: string
+  year?: number
+  month?: number
   search?: string
   featured?: boolean
   published?: boolean
   ordering?: string
-} = {}): Promise<Post[]> {
+  page?: number
+}
+
+export async function fetchPostsPage(params: FetchPostsParams = {}): Promise<PaginatedResult<Post>> {
   const query = new URLSearchParams()
   if (params.category && params.category !== '全部') query.set('category', params.category)
+  if (params.tag) query.set('tag', params.tag)
+  if (params.year) query.set('year', String(params.year))
+  if (params.month) query.set('month', String(params.month))
   if (params.search) query.set('search', params.search)
   if (params.featured) query.set('featured', 'true')
   if (params.published === false) query.set('published', 'false')
   if (params.published === true) query.set('published', 'true')
   if (params.ordering) query.set('ordering', params.ordering)
+  if (params.page && params.page > 1) query.set('page', String(params.page))
 
   const qs = query.toString()
   const path = qs ? `/posts/?${qs}` : '/posts/'
-  const data = await apiFetch<Paginated<Post> | Post[]>(path)
-  return Array.isArray(data) ? data : data.results
+  const data = await apiFetch<PaginatedResult<Post> | Post[]>(path)
+  if (Array.isArray(data)) {
+    return { count: data.length, next: null, previous: null, results: data }
+  }
+  return data
+}
+
+export async function fetchPosts(params: FetchPostsParams = {}): Promise<Post[]> {
+  const data = await fetchPostsPage(params)
+  return data.results
 }
 
 export async function fetchDrafts(): Promise<Post[]> {
   return fetchPosts({ published: false, ordering: '-updated_at' })
 }
 
-export async function fetchPost(id: number): Promise<Post & { body?: string; published?: boolean }> {
+export async function fetchPost(id: number): Promise<PostDetail> {
   return apiFetch(`/posts/${id}/`)
+}
+
+export async function togglePostLike(id: number): Promise<{ likeCount: number; liked: boolean }> {
+  return apiFetch(`/posts/${id}/like/`, { method: 'POST' })
+}
+
+export async function fetchPostComments(postId: number): Promise<Comment[]> {
+  return apiFetch(`/posts/${postId}/comments/`)
+}
+
+export async function createComment(postId: number, body: string): Promise<Comment & { detail?: string }> {
+  return apiFetch(`/posts/${postId}/comments/`, {
+    method: 'POST',
+    body: JSON.stringify({ body }),
+  })
 }
 
 export async function fetchCategoryNames(): Promise<string[]> {
   return apiFetch<string[]>('/posts/categories-list/')
+}
+
+export interface TagCloudItem {
+  name: string
+  count: number
+}
+
+export interface ArchiveItem {
+  year: number
+  month: number
+  count: number
+}
+
+export async function fetchTagCloud(): Promise<TagCloudItem[]> {
+  return apiFetch<TagCloudItem[]>('/posts/tag-cloud/')
+}
+
+export async function fetchArchive(): Promise<ArchiveItem[]> {
+  return apiFetch<ArchiveItem[]>('/posts/archive/')
 }
 
 export interface PostWritePayload {

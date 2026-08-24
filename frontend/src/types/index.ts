@@ -12,6 +12,29 @@ export interface Post {
   featured?: boolean
   published?: boolean
   tags: string[]
+  viewCount?: number
+  likeCount?: number
+}
+
+export interface PostNavItem {
+  id: number
+  title: string
+}
+
+export interface PostDetail extends Post {
+  body?: string
+  liked?: boolean
+  related?: Post[]
+  prev?: PostNavItem | null
+  next?: PostNavItem | null
+}
+
+export interface Comment {
+  id: number
+  body: string
+  authorName: string
+  createdAt: string
+  approved?: boolean
 }
 
 export interface Photo {
@@ -23,6 +46,8 @@ export interface Photo {
   aspect: 'landscape' | 'portrait'
   category: string
   description: string
+  sort_order?: number
+  published?: boolean
 }
 
 export interface NavLink {

@@ -1,12 +1,15 @@
 ﻿<script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { submitContact } from '../api/inbox'
+import { ApiError } from '../api/client'
 import { AVATAR_IMG } from '../data/posts'
 import MediaCover from '../components/MediaCover.vue'
 
-type FormState = 'idle' | 'sending' | 'sent'
+type FormState = 'idle' | 'sending' | 'sent' | 'error'
 
 const form = reactive({ name: '', email: '', subject: '', message: '' })
 const formState = ref<FormState>('idle')
+const errorMessage = ref('')
 
 const socialLinks = [
   { name: '微博', handle: '@星野凛_Rin', desc: '日常碎片与学习记录' },
@@ -30,16 +33,27 @@ const faqs = [
   },
 ]
 
-function handleSubmit(e: Event) {
+async function handleSubmit(e: Event) {
   e.preventDefault()
   formState.value = 'sending'
-  window.setTimeout(() => {
+  errorMessage.value = ''
+  try {
+    await submitContact({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      subject: form.subject.trim(),
+      message: form.message.trim(),
+    })
     formState.value = 'sent'
-  }, 1800)
+  } catch (err) {
+    formState.value = 'error'
+    errorMessage.value = err instanceof ApiError ? err.message : '发送失败，请稍后再试'
+  }
 }
 
 function resetForm() {
   formState.value = 'idle'
+  errorMessage.value = ''
   form.name = ''
   form.email = ''
   form.subject = ''
@@ -106,6 +120,7 @@ function resetForm() {
                 class="font-body"
               />
             </label>
+            <p v-if="formState === 'error'" class="form__error font-body">{{ errorMessage }}</p>
             <button
               type="submit"
               class="form__submit font-body"
@@ -269,6 +284,13 @@ function resetForm() {
     opacity: 0.4;
     cursor: not-allowed;
   }
+}
+
+.form__error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #f08080;
+  letter-spacing: 0.05em;
 }
 
 .spinner {

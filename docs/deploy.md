@@ -1,5 +1,17 @@
 # 生产部署要点
 
+## Docker Compose（推荐）
+
+项目根目录已包含 `docker-compose.yml`：Nginx + Gunicorn + MySQL。
+
+```bash
+docker compose up --build -d
+```
+
+默认站点：http://localhost:8080/ 。上线前请复制 `.env.example` 为 `.env`，至少更换 `SECRET_KEY`、数据库密码，并把 `ALLOWED_HOSTS` / `CSRF_TRUSTED_ORIGINS` / `CORS_ALLOWED_ORIGINS` 改成实际域名。
+
+媒体与静态文件分别落在 `media_data`、`static_data` 卷；数据库在 `mysql_data`。
+
 ## MySQL
 
 1. 创建数据库（utf8mb4）

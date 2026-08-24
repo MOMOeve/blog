@@ -1,3 +1,6 @@
+# Docker Compose 本地覆盖
+.env
+
 # Python
 __pycache__/
 *.py[cod]

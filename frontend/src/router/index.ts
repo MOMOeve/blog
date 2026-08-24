@@ -11,6 +11,8 @@ export type RouteName =
   | 'photography'
   | 'about'
   | 'contact'
+  | 'profile'
+  | 'reset-password'
 
 export interface AppRoute {
   name: RouteName
@@ -19,7 +21,10 @@ export interface AppRoute {
 
 export const paths = {
   home: () => '/',
-  articles: () => '/articles',
+  articles: (search?: string) => {
+    if (!search?.trim()) return '/articles'
+    return `/articles?search=${encodeURIComponent(search.trim())}`
+  },
   article: (id: number) => `/articles/${id}`,
   write: () => '/write',
   edit: (id: number) => `/write/${id}`,
@@ -27,6 +32,9 @@ export const paths = {
   photography: () => '/photography',
   about: () => '/about',
   contact: () => '/contact',
+  profile: () => '/profile',
+  resetPassword: (token?: string) =>
+    token ? `/reset-password?token=${encodeURIComponent(token)}` : '/reset-password',
 }
 
 const PAGE_PATHS: Record<Page, string> = {
@@ -38,7 +46,8 @@ const PAGE_PATHS: Record<Page, string> = {
 }
 
 function parsePath(pathname: string): AppRoute {
-  const path = pathname.replace(/\/+$/, '') || '/'
+  const pathOnly = pathname.split('?')[0].replace(/\/+$/, '') || '/'
+  const path = pathOnly
   if (path === '/') return { name: 'home', params: {} }
   if (path === '/articles') return { name: 'articles', params: {} }
   const detail = /^\/articles\/(\d+)$/.exec(path)
@@ -50,6 +59,8 @@ function parsePath(pathname: string): AppRoute {
   if (path === '/photography') return { name: 'photography', params: {} }
   if (path === '/about') return { name: 'about', params: {} }
   if (path === '/contact') return { name: 'contact', params: {} }
+  if (path === '/profile') return { name: 'profile', params: {} }
+  if (path === '/reset-password') return { name: 'reset-password', params: {} }
   return { name: 'home', params: {} }
 }
 
@@ -74,8 +85,9 @@ export function useRouter() {
 
   function push(path: string) {
     const next = parsePath(path)
-    if (window.location.pathname !== path) {
-      history.pushState(null, '', path)
+    const target = path.startsWith('/') ? path : `/${path}`
+    if (`${window.location.pathname}${window.location.search}` !== target) {
+      history.pushState(null, '', target)
     }
     currentRoute.value = next
     scrollTop()
@@ -102,6 +114,8 @@ export function useRouter() {
       photography: '摄影',
       about: '关于',
       contact: '联系',
+      profile: '首页',
+      'reset-password': '首页',
     }
     return map[currentRoute.value.name]
   })

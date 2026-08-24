@@ -5,7 +5,7 @@ import type { Post } from '../types'
 import { useAuth } from '../composables/useAuth'
 import { useRouter } from '../router'
 
-const { isStaff, openLogin } = useAuth()
+const { isAuthor, openLogin } = useAuth()
 const { push, paths } = useRouter()
 
 const drafts = ref<Post[]>([])
@@ -14,7 +14,7 @@ const error = ref('')
 const actingId = ref<number | null>(null)
 
 async function load() {
-  if (!isStaff.value) {
+  if (!isAuthor.value) {
     loading.value = false
     return
   }
@@ -79,7 +79,7 @@ onMounted(() => {
     </div>
 
     <div class="container drafts">
-      <div v-if="!isStaff" class="drafts__warn font-body">
+      <div v-if="!isAuthor" class="drafts__warn font-body">
         需要 staff 账号才能查看草稿。
         <button type="button" class="drafts__link" @click="openLogin">去登录</button>
       </div>
@@ -131,7 +131,7 @@ onMounted(() => {
         </li>
       </ul>
 
-      <div v-if="isStaff && drafts.length" class="drafts__foot">
+      <div v-if="isAuthor && drafts.length" class="drafts__foot">
         <button type="button" class="font-body" @click="push(paths.write())">+ 新建草稿</button>
       </div>
     </div>

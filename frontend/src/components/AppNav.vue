@@ -6,14 +6,38 @@ import { useAuth } from '../composables/useAuth'
 import { useRouter } from '../router'
 
 const menuOpen = ref(false)
+const searchOpen = ref(false)
+const searchQuery = ref('')
 const { theme, toggleTheme } = useTheme()
-const { isLoggedIn, isStaff, user, openLogin, logout } = useAuth()
+const { isLoggedIn, isAuthor, user, openLogin, logout } = useAuth()
 const { activePage, push, paths, route } = useRouter()
 const isDraftsPage = computed(() => route.value.name === 'drafts')
 
 function go(path: string) {
   push(path)
   menuOpen.value = false
+}
+
+function openSearch() {
+  searchOpen.value = true
+  menuOpen.value = false
+}
+
+function closeSearch() {
+  searchOpen.value = false
+  searchQuery.value = ''
+}
+
+function submitSearch() {
+  const q = searchQuery.value.trim()
+  if (!q) return
+  push(paths.articles(q))
+  closeSearch()
+}
+
+function onSearchKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter') submitSearch()
+  if (e.key === 'Escape') closeSearch()
 }
 </script>
 
@@ -75,7 +99,7 @@ function go(path: string) {
           </svg>
         </button>
 
-        <button class="nav__icon-btn" type="button" aria-label="搜索">
+        <button class="nav__icon-btn" type="button" aria-label="搜索" @click="openSearch">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.4" />
             <line
@@ -92,7 +116,7 @@ function go(path: string) {
 
         <div v-if="isLoggedIn" class="nav__user">
           <button
-            v-if="isStaff"
+            v-if="isAuthor"
             type="button"
             class="nav__write-btn font-body"
             :class="{ 'is-active': isDraftsPage }"
@@ -101,14 +125,16 @@ function go(path: string) {
             草稿箱
           </button>
           <button
-            v-if="isStaff"
+            v-if="isAuthor"
             type="button"
             class="nav__write-btn font-body"
             @click="go(paths.write())"
           >
             写文章
           </button>
-          <span class="nav__user-name font-body">{{ user?.displayName }}</span>
+          <button type="button" class="nav__user-name font-body nav__profile-link" @click="go(paths.profile())">
+            {{ user?.displayName }}
+          </button>
           <button type="button" class="nav__login-btn font-body" @click="logout">退出</button>
         </div>
         <button v-else type="button" class="nav__login-btn font-body" @click="openLogin">登录</button>
@@ -134,8 +160,11 @@ function go(path: string) {
         {{ item.label }}
       </button>
       <div class="nav__mobile-actions">
+        <button type="button" class="nav__mobile-link font-body" @click="openSearch">
+          搜索文章
+        </button>
         <button
-          v-if="isStaff"
+          v-if="isAuthor"
           type="button"
           class="nav__mobile-link font-body"
           @click="go(paths.drafts()); menuOpen = false"
@@ -143,12 +172,20 @@ function go(path: string) {
           草稿箱
         </button>
         <button
-          v-if="isStaff"
+          v-if="isAuthor"
           type="button"
           class="nav__mobile-link font-body"
           @click="go(paths.write()); menuOpen = false"
         >
           写文章
+        </button>
+        <button
+          v-if="isLoggedIn"
+          type="button"
+          class="nav__mobile-link font-body"
+          @click="go(paths.profile()); menuOpen = false"
+        >
+          个人资料
         </button>
         <button type="button" class="nav__mobile-link font-body" @click="toggleTheme">
           {{ theme === 'dark' ? '浅色主题' : '深色主题' }}
@@ -164,6 +201,31 @@ function go(path: string) {
         <button v-else type="button" class="nav__mobile-link font-body" @click="openLogin(); menuOpen = false">
           登录
         </button>
+      </div>
+    </div>
+
+    <div v-if="searchOpen" class="nav__search-overlay" @click.self="closeSearch">
+      <div class="nav__search-panel">
+        <label class="nav__search-label font-body" for="nav-search">搜索文章</label>
+        <div class="nav__search-field">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.2" />
+            <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <input
+            id="nav-search"
+            v-model="searchQuery"
+            type="search"
+            placeholder="输入关键词…"
+            class="font-body"
+            autofocus
+            @keydown="onSearchKeydown"
+          />
+          <button type="button" class="nav__search-go font-body" :disabled="!searchQuery.trim()" @click="submitSearch">
+            搜索
+          </button>
+        </div>
+        <button type="button" class="nav__search-close font-body" @click="closeSearch">取消</button>
       </div>
     </div>
   </nav>
@@ -310,7 +372,8 @@ function go(path: string) {
   }
 }
 
-.nav__user-name {
+.nav__user-name,
+.nav__profile-link {
   font-size: 0.75rem;
   color: var(--color-soft);
   letter-spacing: 0.08em;
@@ -318,6 +381,17 @@ function go(path: string) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.nav__profile-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--color-fg);
+  }
 }
 
 .nav__menu-btn {
@@ -355,6 +429,88 @@ function go(path: string) {
   &:hover {
     color: var(--color-fg);
     background: rgba(126, 184, 247, 0.05);
+  }
+}
+
+.nav__search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(6, 10, 24, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6rem 1.5rem 1.5rem;
+}
+
+.nav__search-panel {
+  width: 100%;
+  max-width: 32rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(126, 184, 247, 0.18);
+  background: var(--color-nav-mobile-bg);
+}
+
+.nav__search-label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--color-dim);
+  margin-bottom: 0.75rem;
+}
+
+.nav__search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(126, 184, 247, 0.15);
+  background: rgba(126, 184, 247, 0.04);
+  color: var(--color-dim);
+
+  input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--color-fg);
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+
+    &::placeholder {
+      color: var(--color-faint);
+    }
+  }
+}
+
+.nav__search-go {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--color-primary);
+  border: 1px solid rgba(245, 200, 66, 0.35);
+  padding: 0.35rem 0.75rem;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: rgba(245, 200, 66, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.nav__search-close {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--color-muted-fg);
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--color-fg);
   }
 }
 </style>

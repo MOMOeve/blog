@@ -3,10 +3,10 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { createPost, fetchCategoryNames, fetchPost, updatePost } from '../api/posts'
 import { uploadImage } from '../api/upload'
 import { useAuth } from '../composables/useAuth'
-import { renderMarkdown } from '../utils/markdown'
+import { renderMarkdownDocument } from '../utils/markdown'
 import { useRouter } from '../router'
 
-const { isStaff, openLogin } = useAuth()
+const { isAuthor, openLogin } = useAuth()
 const { route, push, paths } = useRouter()
 
 const title = ref('')
@@ -29,13 +29,16 @@ const error = ref('')
 const showPreview = ref(true)
 const coverInput = ref<HTMLInputElement | null>(null)
 const bodyImageInput = ref<HTMLInputElement | null>(null)
+const bodyTextarea = ref<HTMLTextAreaElement | null>(null)
 
 const editPostId = computed(() =>
   route.value.name === 'article-edit' ? Number(route.value.params.id) : null,
 )
 const isEdit = computed(() => editPostId.value !== null && !Number.isNaN(editPostId.value!))
 const pageTitle = computed(() => (isEdit.value ? '编辑文章' : '写文章'))
-const previewHtml = computed(() => renderMarkdown(body.value))
+const markdownDoc = computed(() => renderMarkdownDocument(body.value))
+const previewHtml = computed(() => markdownDoc.value.html)
+const previewToc = computed(() => markdownDoc.value.toc)
 
 async function loadCategories() {
   try {
@@ -78,7 +81,7 @@ function parseTags(): string[] {
 }
 
 async function save(publishNow: boolean) {
-  if (!isStaff.value) {
+  if (!isAuthor.value) {
     openLogin()
     error.value = '需要工作人员账号才能发布'
     return
@@ -129,7 +132,60 @@ async function save(publishNow: boolean) {
 }
 
 function insertSnippet(snippet: string) {
+  if (bodyTextarea.value) {
+    insertAtCursor(bodyTextarea.value, snippet)
+    return
+  }
   body.value = body.value ? `${body.value}\n\n${snippet}` : snippet
+}
+
+function insertAtCursor(textarea: HTMLTextAreaElement, snippet: string) {
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const before = body.value.slice(0, start)
+  const after = body.value.slice(end)
+  const prefix = before && !before.endsWith('\n') ? '\n\n' : ''
+  body.value = `${before}${prefix}${snippet}${after ? `\n${after}` : ''}`
+  const cursor = (before + prefix + snippet).length
+  window.requestAnimationFrame(() => {
+    textarea.focus()
+    textarea.setSelectionRange(cursor, cursor)
+  })
+}
+
+async function insertUploadedImage(file: File) {
+  if (!isAuthor.value) {
+    openLogin()
+    return
+  }
+  uploadingBody.value = true
+  error.value = ''
+  try {
+    const result = await uploadImage(file)
+    const md = `![${file.name}](${result.path || result.url})`
+    if (bodyTextarea.value) {
+      insertAtCursor(bodyTextarea.value, md)
+    } else {
+      insertSnippet(md)
+    }
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : '图片上传失败'
+  } finally {
+    uploadingBody.value = false
+  }
+}
+
+async function onBodyPaste(e: ClipboardEvent) {
+  const items = e.clipboardData?.items
+  if (!items) return
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault()
+      const file = item.getAsFile()
+      if (file) await insertUploadedImage(file)
+      return
+    }
+  }
 }
 
 function saveDraft() {
@@ -148,7 +204,7 @@ async function onCoverSelected(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
-  if (!isStaff.value) {
+  if (!isAuthor.value) {
     openLogin()
     return
   }
@@ -169,22 +225,8 @@ async function onBodyImageSelected(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
-  if (!isStaff.value) {
-    openLogin()
-    return
-  }
-  uploadingBody.value = true
-  error.value = ''
-  try {
-    const result = await uploadImage(file)
-    const md = `![${file.name}](${result.path || result.url})`
-    insertSnippet(md)
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : '图片上传失败'
-  } finally {
-    uploadingBody.value = false
-    input.value = ''
-  }
+  await insertUploadedImage(file)
+  input.value = ''
 }
 
 onMounted(async () => {
@@ -218,10 +260,10 @@ watch(
       <div class="editor__top">
         <button type="button" class="editor__back font-body" @click="cancelEdit">← 返回</button>
         <h1 class="editor__title font-display">{{ pageTitle }}</h1>
-        <p class="editor__hint font-body">正文使用 Markdown（支持标题、列表、链接、代码块等）</p>
+        <p class="editor__hint font-body">正文使用 Markdown（支持代码高亮、目录、粘贴/上传图片）</p>
       </div>
 
-      <div v-if="!isStaff" class="editor__warn font-body">
+      <div v-if="!isAuthor" class="editor__warn font-body">
         当前账号无写作权限，请使用 staff 账号登录（demo@example.com）。
         <button type="button" class="editor__link" @click="openLogin">去登录</button>
       </div>
@@ -272,7 +314,7 @@ watch(
             <button
               type="button"
               class="btn-upload font-body"
-              :disabled="!isStaff || uploadingCover"
+              :disabled="!isAuthor || uploadingCover"
               @click="coverInput?.click()"
             >
               {{ uploadingCover ? '上传中…' : '上传封面' }}
@@ -304,7 +346,7 @@ watch(
               <button
                 type="button"
                 class="font-body"
-                :disabled="!isStaff || uploadingBody"
+                :disabled="!isAuthor || uploadingBody"
                 @click="bodyImageInput?.click()"
               >
                 {{ uploadingBody ? '上传中…' : '插图' }}
@@ -316,12 +358,27 @@ watch(
           </div>
           <div class="editor__split" :class="{ 'is-preview': showPreview }">
             <textarea
+              ref="bodyTextarea"
               v-model="body"
               class="font-body editor__md"
               rows="16"
-              placeholder="# 标题&#10;&#10;正文从这里开始…"
+              placeholder="# 标题&#10;&#10;正文从这里开始…（可直接粘贴图片）"
+              @paste="onBodyPaste"
             />
-            <div v-if="showPreview" class="editor__preview md-body" v-html="previewHtml" />
+            <div v-if="showPreview" class="editor__preview-wrap">
+              <div v-if="previewToc.length" class="editor__preview-toc">
+                <p class="font-body">目录预览</p>
+                <span
+                  v-for="item in previewToc"
+                  :key="item.id"
+                  class="font-body"
+                  :class="`is-h${item.level}`"
+                >
+                  {{ item.text }}
+                </span>
+              </div>
+              <div class="editor__preview md-body" v-html="previewHtml" />
+            </div>
           </div>
         </div>
 
@@ -339,7 +396,7 @@ watch(
           <button
             type="button"
             class="btn-ghost font-body"
-            :disabled="saving || !isStaff"
+            :disabled="saving || !isAuthor"
             @click="saveDraft()"
           >
             {{ saving ? '保存中…' : '保存草稿' }}
@@ -347,7 +404,7 @@ watch(
           <button
             type="button"
             class="btn-primary font-body"
-            :disabled="saving || !isStaff"
+            :disabled="saving || !isAuthor"
             @click="savePublished()"
           >
             {{ saving ? '保存中…' : '发布文章' }}
@@ -547,8 +604,40 @@ watch(
   resize: vertical;
 }
 
-.editor__preview {
+.editor__preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   min-height: 22rem;
+}
+
+.editor__preview-toc {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  background: rgba(126, 184, 247, 0.04);
+
+  > .font-body:first-child {
+    margin: 0 0 0.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--color-secondary);
+  }
+
+  span {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--color-dim);
+    margin: 0.2rem 0;
+
+    &.is-h3 {
+      padding-left: 0.75rem;
+    }
+  }
+}
+
+.editor__preview {
+  flex: 1;
+  min-height: 18rem;
   padding: 1rem 1.1rem;
   border: 1px solid var(--color-border);
   background: var(--color-card);

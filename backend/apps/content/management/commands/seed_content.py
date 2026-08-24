@@ -138,6 +138,11 @@ class Command(BaseCommand):
             user.email = 'demo@example.com'
             user.is_staff = True
             user.save()
+            profile = getattr(user, 'profile', None)
+            if profile:
+                profile.role = 'author'
+                profile.display_name = profile.display_name or 'Demo'
+                profile.save(update_fields=['role', 'display_name'])
             self.stdout.write(self.style.SUCCESS('创建演示账号 demo@example.com / demo1234'))
         else:
             self.stdout.write('演示账号已存在')

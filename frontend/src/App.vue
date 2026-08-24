@@ -11,6 +11,8 @@ import DraftsPage from './views/DraftsPage.vue'
 import PhotographyPage from './views/PhotographyPage.vue'
 import AboutPage from './views/AboutPage.vue'
 import ContactPage from './views/ContactPage.vue'
+import ProfilePage from './views/ProfilePage.vue'
+import ResetPasswordPage from './views/ResetPasswordPage.vue'
 import { useTheme } from './composables/useTheme'
 import { useAuth } from './composables/useAuth'
 import { useRouter } from './router'
@@ -36,6 +38,8 @@ onMounted(() => {
     <PhotographyPage v-else-if="route.name === 'photography'" />
     <AboutPage v-else-if="route.name === 'about'" />
     <ContactPage v-else-if="route.name === 'contact'" />
+    <ProfilePage v-else-if="route.name === 'profile'" />
+    <ResetPasswordPage v-else-if="route.name === 'reset-password'" />
 
     <AppFooter />
     <LoginModal />
