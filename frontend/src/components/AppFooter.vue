@@ -1,8 +1,31 @@
 ﻿<script setup lang="ts">
+import { ref } from 'vue'
 import { navLinks } from '../data/posts'
+import { subscribeNewsletter } from '../api/inbox'
+import { ApiError } from '../api/client'
 import { useRouter } from '../router'
 
 const { push } = useRouter()
+
+const subscribeEmail = ref('')
+const subscribeState = ref<'idle' | 'sending' | 'done' | 'error'>('idle')
+const subscribeMessage = ref('')
+
+async function handleSubscribe() {
+  const email = subscribeEmail.value.trim()
+  if (!email) return
+  subscribeState.value = 'sending'
+  subscribeMessage.value = ''
+  try {
+    const result = await subscribeNewsletter(email)
+    subscribeState.value = 'done'
+    subscribeMessage.value = result.detail ?? '订阅成功，感谢关注'
+    subscribeEmail.value = ''
+  } catch (err) {
+    subscribeState.value = 'error'
+    subscribeMessage.value = err instanceof ApiError ? err.message : '订阅失败，请稍后再试'
+  }
+}
 </script>
 
 <template>
@@ -40,17 +63,38 @@ const { push } = useRouter()
           <h5 class="footer__heading font-display">订阅更新</h5>
           <p class="footer__desc font-body">不错过每一次日落与文字。</p>
           <div class="footer__subscribe">
-            <input type="email" placeholder="your@email.com" class="font-body" />
-            <button type="button" class="font-body">订阅</button>
+            <input
+              v-model="subscribeEmail"
+              type="email"
+              placeholder="your@email.com"
+              class="font-body"
+              :disabled="subscribeState === 'sending'"
+              @keydown.enter.prevent="handleSubscribe"
+            />
+            <button
+              type="button"
+              class="font-body"
+              :disabled="subscribeState === 'sending' || !subscribeEmail.trim()"
+              @click="handleSubscribe"
+            >
+              {{ subscribeState === 'sending' ? '提交中…' : '订阅' }}
+            </button>
           </div>
+          <p v-if="subscribeMessage" class="footer__subscribe-msg font-body">{{ subscribeMessage }}</p>
         </div>
       </div>
 
       <div class="divider-light footer__divider" />
 
-      <div class="footer__bottom">
+        <div class="footer__bottom">
         <p class="font-body">© 2026 星野文记 · 代码与语言，慢慢来</p>
         <div class="footer__socials">
+          <a href="/api/v1/feed/rss/" target="_blank" rel="noopener noreferrer" class="font-body">
+            RSS
+          </a>
+          <a href="/api/v1/feed/sitemap.xml" target="_blank" rel="noopener noreferrer" class="font-body">
+            Sitemap
+          </a>
           <button v-for="s in ['微博', 'GitHub', 'Twitter']" :key="s" type="button" class="font-body">
             {{ s }}
           </button>
@@ -175,10 +219,23 @@ const { push } = useRouter()
     letter-spacing: 0.05em;
     transition: background 0.2s;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: rgba(245, 200, 66, 0.25);
     }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
   }
+}
+
+.footer__subscribe-msg {
+  margin: 0.75rem 0 0;
+  font-size: 0.65rem;
+  color: var(--color-secondary);
+  letter-spacing: 0.05em;
+  line-height: 1.6;
 }
 
 .footer__divider {
@@ -209,6 +266,7 @@ const { push } = useRouter()
   align-items: center;
   gap: 1.5rem;
 
+  a,
   button {
     font-size: 0.65rem;
     color: var(--color-faint);

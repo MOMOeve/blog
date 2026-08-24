@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .upload import MediaUploadView
+from .upload import AvatarUploadView, MediaUploadView
 from .views import PhotoViewSet
 
 router = DefaultRouter()
@@ -9,5 +9,6 @@ router.register('photos', PhotoViewSet, basename='photo')
 
 urlpatterns = [
     path('uploads/', MediaUploadView.as_view(), name='media-upload'),
+    path('uploads/avatar/', AvatarUploadView.as_view(), name='avatar-upload'),
     path('', include(router.urls)),
 ]

@@ -34,11 +34,25 @@ blog/
 
 ## 快速启动
 
-需同时跑后端（8000）和前端（5173）。
+### Docker 一键启动（推荐）
 
-### 一键启动（推荐）
+需已安装 [Docker Desktop](https://docs.docker.com/get-docker/)。在项目根目录执行：
 
-先完成下方「首次准备」，之后在项目根目录执行：
+```bash
+docker compose up --build
+```
+
+浏览器打开 http://localhost:8080/
+
+- 演示账号（staff）：`demo@example.com` / `demo1234`
+- Admin：http://localhost:8080/admin/
+- Swagger：http://localhost:8080/api/docs/
+
+可选：复制 `.env.example` 为 `.env` 后修改端口、密钥或数据库密码。停止用 `docker compose down`；连数据一起清掉用 `docker compose down -v`。
+
+### 本地开发一键启动
+
+需同时跑后端（8000）和前端（5173）。先完成下方「首次准备」，之后在项目根目录执行：
 
 ```bash
 python start.py
@@ -101,6 +115,8 @@ npm run dev
 | `/photography` | 摄影 |
 | `/about` | 关于 |
 | `/contact` | 联系 |
+| `/profile` | 个人资料（登录） |
+| `/reset-password?token=…` | 重置密码 |
 
 写作：正文为 Markdown；「保存草稿」进草稿箱，「发布」进详情。草稿可继续编辑、一键发布或删除。
 
@@ -130,30 +146,32 @@ npm run dev
 
 ### 优先（现有半成品）
 
-- [ ] 顶栏搜索：搜索图标接到文章搜索
-- [ ] 联系表单 / 页脚订阅：存库或发邮件
-- [ ] 文章列表分页（接口已有 `PAGE_SIZE`）
+- [x] 顶栏搜索：搜索图标接到文章搜索
+- [x] 联系表单 / 页脚订阅：存库或发邮件
+- [x] 文章列表分页（接口已有 `PAGE_SIZE`）
 
 ### 内容体验
 
-- [ ] Markdown 增强：代码高亮、目录 TOC、粘贴即上传图片
-- [ ] 摄影后台编辑（改说明 / 分类 / 排序 / 上传）
-- [ ] 相关文章、上一篇 / 下一篇
-- [ ] 阅读量、点赞
+- [x] Markdown 增强：代码高亮、目录 TOC、粘贴即上传图片
+- [x] 摄影后台编辑（改说明 / 分类 / 排序 / 上传）
+- [x] 相关文章、上一篇 / 下一篇
+- [x] 阅读量、点赞
 
 ### 账号
 
-- [ ] 注册、改密码、找回密码
-- [ ] 读者 / 作者角色（不只 `is_staff`）
-- [ ] 个人资料页（头像、简介）
+- [x] 注册（登录弹窗可切换注册）
+- [x] 改密码、找回密码
+- [x] 读者 / 作者角色（不只 `is_staff`）
+- [x] 个人资料页（头像、简介）
 
 ### 互动与分发
 
-- [ ] 评论（登录后评论 + 审核）
-- [ ] RSS / sitemap
-- [ ] 标签云、按年月归档
+- [x] 评论（登录后评论 + 审核）
+- [x] RSS（页脚链接 `/api/v1/feed/rss/`）
+- [x] sitemap（`/api/v1/feed/sitemap.xml`）
+- [x] 标签云、按年月归档
 
 ### 工程
 
-- [ ] 测试 + CI
-- [ ] 生产部署落地：Gunicorn + Nginx + MySQL（见 [docs/deploy.md](docs/deploy.md)）
+- [x] 测试 + CI
+- [x] 生产部署落地：Gunicorn + Nginx + MySQL（`docker compose up --build`，见 [docs/deploy.md](docs/deploy.md)）

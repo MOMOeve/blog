@@ -58,6 +58,8 @@ class Post(models.Model):
         verbose_name='作者',
     )
     published_at = models.DateTimeField('发布时间', null=True, blank=True)
+    view_count = models.PositiveIntegerField('阅读量', default=0)
+    like_count = models.PositiveIntegerField('点赞数', default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -68,3 +70,52 @@ class Post(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class PostViewRecord(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='view_records', verbose_name='文章')
+    visitor_id = models.CharField('访客标识', max_length=64, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = '阅读记录'
+        verbose_name_plural = '阅读记录'
+        constraints = [
+            models.UniqueConstraint(fields=['post', 'visitor_id'], name='unique_post_view'),
+        ]
+
+
+class PostLike(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes', verbose_name='文章')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='post_likes',
+        verbose_name='用户',
+    )
+    visitor_id = models.CharField('访客标识', max_length=64, blank=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = '点赞'
+        verbose_name_plural = '点赞'
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', verbose_name='文章')
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='作者',
+    )
+    body = models.TextField('内容')
+    approved = models.BooleanField('已通过', default=False)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '评论'
+        verbose_name_plural = '评论'
+        ordering = ['created_at']

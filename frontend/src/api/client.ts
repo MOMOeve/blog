@@ -1,6 +1,17 @@
 /** API 基址：开发走 Vite 代理到 Django，生产可改为完整域名 */
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
+const VISITOR_KEY = 'hoshino-visitor-id'
+
+function getVisitorId(): string {
+  let id = localStorage.getItem(VISITOR_KEY)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(VISITOR_KEY, id)
+  }
+  return id
+}
+
 export class ApiError extends Error {
   status: number
 
@@ -36,6 +47,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     headers.set('Content-Type', 'application/json')
   }
   if (token) headers.set('Authorization', `Bearer ${token}`)
+  headers.set('X-Visitor-Id', getVisitorId())
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
