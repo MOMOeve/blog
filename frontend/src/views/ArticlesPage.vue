@@ -22,10 +22,10 @@ const viewMode = ref<ViewMode>('grid')
 const sortBy = ref<SortBy>('newest')
 const currentPage = ref(1)
 const totalCount = ref(0)
-const posts = ref<Post[]>(fallbackPosts)
-const categories = ref<string[]>(fallbackCategories)
+const posts = ref<Post[]>([])
+const categories = ref<string[]>(['全部'])
 const useRemote = ref(false)
-const loading = ref(false)
+const loading = ref(true)
 const tagCloud = ref<TagCloudItem[]>([])
 const archive = ref<ArchiveItem[]>([])
 
@@ -93,13 +93,14 @@ async function loadPosts() {
       ordering: sortBy.value === 'oldest' ? 'published_at' : '-published_at',
       page: currentPage.value,
     })
-    if (data.results.length || useRemote.value || data.count > 0) {
-      posts.value = data.results
-      totalCount.value = data.count
-      useRemote.value = true
-    }
+    posts.value = data.results
+    totalCount.value = data.count
+    useRemote.value = true
   } catch {
-    /* keep fallback */
+    if (!useRemote.value) {
+      posts.value = fallbackPosts
+      categories.value = fallbackCategories
+    }
   } finally {
     loading.value = false
   }
@@ -194,13 +195,13 @@ function goToPage(page: number) {
       <div class="page-header__glow" />
       <div class="page-header__line" />
       <div class="page-header__inner">
-        <p class="page-eyebrow animate-fade-up">✦ &nbsp; ARTICLES</p>
+        <p class="page-eyebrow animate-fade-up">✦ &nbsp; 手记</p>
         <h1 class="page-title animate-fade-up-delay-1">
           文章
-          <span class="page-title__sub">· 所有文字</span>
+          <span class="page-title__sub">· 旅途见闻</span>
         </h1>
         <p class="page-desc animate-fade-up-delay-2">
-          共 {{ displayCount }} 篇文章，关于代码、语言与那些值得记下来的日子
+          共 {{ displayCount }} 篇，像货单一样列着沿途记下的事
         </p>
         <button
           v-if="isAuthor"
@@ -535,7 +536,7 @@ function goToPage(page: number) {
 
 .articles__search {
   position: relative;
-  color: #3d5070;
+  color: var(--color-quiet);
 
   svg {
     position: absolute;
@@ -585,7 +586,7 @@ select {
 
   button {
     padding: 0.5rem;
-    color: #3d5070;
+    color: var(--color-quiet);
     transition: color 0.2s, background 0.2s;
 
     &.is-active {
@@ -601,7 +602,7 @@ select {
 
 .articles__count {
   font-size: 0.75rem;
-  color: #3d5070;
+  color: var(--color-quiet);
   letter-spacing: 0.05em;
   margin: 0 0 1.5rem;
 
@@ -683,7 +684,7 @@ select {
 
   p {
     font-size: 0.875rem;
-    color: #3d5070;
+    color: var(--color-quiet);
     letter-spacing: 0.2em;
     margin: 0;
   }
@@ -713,7 +714,7 @@ select {
 
 .grid-card {
   border: 1px solid rgba(126, 184, 247, 0.08);
-  background: linear-gradient(145deg, rgba(11, 16, 40, 0.85), rgba(8, 12, 28, 0.92));
+  background: linear-gradient(145deg, var(--color-card), var(--color-muted));
   display: flex;
   flex-direction: column;
   cursor: pointer;
@@ -805,7 +806,7 @@ select {
     padding-top: 0.75rem;
     border-top: 1px solid rgba(126, 184, 247, 0.06);
     font-size: 0.65rem;
-    color: #2f3f56;
+    color: var(--color-quiet-deep);
     letter-spacing: 0.05em;
   }
 }
@@ -888,7 +889,7 @@ select {
   gap: 0.75rem;
   margin-bottom: 0.5rem;
   font-size: 0.65rem;
-  color: #2f3f56;
+  color: var(--color-quiet-deep);
   letter-spacing: 0.05em;
 
   .cat {
@@ -902,7 +903,7 @@ select {
 .list-row__arrow {
   flex-shrink: 0;
   align-self: center;
-  color: #2f3f56;
+  color: var(--color-quiet-deep);
   transition: all 0.2s;
 }
 </style>

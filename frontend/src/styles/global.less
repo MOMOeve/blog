@@ -17,6 +17,11 @@ body,
 
 body {
   background-color: var(--color-bg);
+  background-image:
+    radial-gradient(ellipse 120% 55% at 50% -8%, var(--color-bg-accent), transparent 58%),
+    radial-gradient(ellipse 45% 35% at 100% 0%, var(--color-primary-soft), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 0% 100%, var(--color-secondary-soft), transparent 50%);
+  background-attachment: fixed;
   color: var(--color-fg);
   font-family: var(--font-body);
   font-weight: 300;
@@ -61,7 +66,7 @@ img {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(126, 184, 247, 0.25);
+  background: var(--color-border-strong);
   border-radius: 2px;
 }
 
@@ -152,12 +157,32 @@ img {
 }
 
 .gold-shimmer {
-  background: linear-gradient(90deg, #f5c842 0%, #ffe88a 40%, #e8a520 60%, #f5c842 100%);
+  background: linear-gradient(
+    90deg,
+    #f3e8e2 0%,
+    #ffffff 35%,
+    #d4b49a 55%,
+    #f3e8e2 100%
+  );
   background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: shimmerGold 4s linear infinite;
+}
+
+[data-theme='light'] .gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    color-mix(in srgb, var(--color-primary) 55%, #fff) 40%,
+    var(--color-secondary) 65%,
+    var(--color-primary) 100%
+  );
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .card-hover {
@@ -168,9 +193,7 @@ img {
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow:
-    0 20px 60px rgba(18, 26, 46, 0.7),
-    0 0 0 1px rgba(126, 184, 247, 0.2);
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--color-border);
 }
 
 .img-overlay {
@@ -184,9 +207,9 @@ img {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(18, 26, 46, 0) 0%,
-    rgba(18, 26, 46, 0.15) 50%,
-    rgba(18, 26, 46, 0.75) 100%
+    transparent 0%,
+    color-mix(in srgb, var(--color-hero-fade) 15%, transparent) 50%,
+    color-mix(in srgb, var(--color-hero-fade) 78%, transparent) 100%
   );
 }
 
@@ -202,8 +225,8 @@ img {
   letter-spacing: 0.12em;
   padding: 3px 10px;
   border-radius: 2px;
-  background: rgba(126, 184, 247, 0.1);
-  border: 1px solid rgba(126, 184, 247, 0.2);
+  background: var(--color-secondary-soft);
+  border: 1px solid var(--color-border);
   color: var(--color-secondary);
   transition:
     background 0.2s,
@@ -211,8 +234,8 @@ img {
 }
 
 .tag-pill:hover {
-  background: rgba(126, 184, 247, 0.18);
-  border-color: rgba(126, 184, 247, 0.4);
+  background: color-mix(in srgb, var(--color-secondary-soft) 160%, transparent);
+  border-color: var(--color-border-strong);
 }
 
 .divider-light {
@@ -220,8 +243,8 @@ img {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(126, 184, 247, 0.25) 30%,
-    rgba(245, 200, 66, 0.2) 60%,
+    var(--color-border-strong) 30%,
+    color-mix(in srgb, var(--color-primary) 35%, transparent) 60%,
     transparent
   );
 }
@@ -242,7 +265,7 @@ img {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(14, 21, 53, 0.8), transparent);
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, var(--color-header-glow), transparent);
 }
 
 .page-header__line {
@@ -254,8 +277,8 @@ img {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(126, 184, 247, 0.3) 30%,
-    rgba(245, 200, 66, 0.2) 60%,
+    var(--color-border-strong) 30%,
+    color-mix(in srgb, var(--color-primary) 35%, transparent) 60%,
     transparent
   );
 }
@@ -312,19 +335,20 @@ img {
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   padding: 0.5rem 1rem;
-  border: 1px solid rgba(126, 184, 247, 0.12);
+  border: 1px solid var(--color-border);
   background: transparent;
   color: var(--color-muted-fg);
   transition: all 0.2s;
 
   &:hover {
-    border-color: rgba(126, 184, 247, 0.3);
+    border-color: var(--color-border-strong);
     color: var(--color-fg);
+    background: var(--color-surface-deep);
   }
 
   &.is-active {
-    background: rgba(245, 200, 66, 0.1);
-    border-color: rgba(245, 200, 66, 0.4);
+    background: var(--color-primary-soft);
+    border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
     color: var(--color-primary);
   }
 }

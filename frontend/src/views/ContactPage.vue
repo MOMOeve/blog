@@ -1,8 +1,8 @@
 ﻿<script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
+import { fetchSiteAuthor, type SiteAuthor } from '../api/auth'
 import { submitContact } from '../api/inbox'
 import { ApiError } from '../api/client'
-import { AVATAR_IMG } from '../data/posts'
 import MediaCover from '../components/MediaCover.vue'
 
 type FormState = 'idle' | 'sending' | 'sent' | 'error'
@@ -10,28 +10,15 @@ type FormState = 'idle' | 'sending' | 'sent' | 'error'
 const form = reactive({ name: '', email: '', subject: '', message: '' })
 const formState = ref<FormState>('idle')
 const errorMessage = ref('')
+const author = ref<SiteAuthor>({ displayName: '', bio: '', avatar: '' })
 
-const socialLinks = [
-  { name: '微博', handle: '@星野凛_Rin', desc: '日常碎片与学习记录' },
-  { name: 'GitHub', handle: 'hoshino-rin', desc: '开源项目与代码片段' },
-  { name: 'Twitter / X', handle: '@hoshino_codes', desc: '技术碎碎念 · 语言学习打卡' },
-  { name: '邮箱', handle: 'hello@hoshino-rin.com', desc: '合作 · 交流 · 互相学习' },
-]
-
-const faqs = [
-  {
-    q: '可以问代码/语言相关问题吗？',
-    a: '当然可以，能帮上忙的我会尽力回答。问题越具体，越容易得到有用的回复。',
-  },
-  {
-    q: '博客内容可以转载吗？',
-    a: '非商业用途注明出处即可，商业用途请先联系我。',
-  },
-  {
-    q: '可以交流语言学习经验吗？',
-    a: '非常欢迎！同样在学语言的朋友随时都可以来聊，一起进步。',
-  },
-]
+onMounted(async () => {
+  try {
+    author.value = await fetchSiteAuthor()
+  } catch {
+    /* keep empty */
+  }
+})
 
 async function handleSubmit(e: Event) {
   e.preventDefault()
@@ -70,9 +57,9 @@ function resetForm() {
         <p class="page-eyebrow animate-fade-up">✦ &nbsp; CONTACT</p>
         <h1 class="page-title animate-fade-up-delay-1">
           联系
-          <span class="page-title__sub">· 说点什么</span>
+          <span class="page-title__sub">· 捎个话</span>
         </h1>
-        <p class="page-desc animate-fade-up-delay-2">关于代码、语言、学习方法，或者只是想打个招呼——都欢迎</p>
+        <p class="page-desc animate-fade-up-delay-2">有话想说，欢迎留言</p>
       </div>
     </div>
 
@@ -90,9 +77,7 @@ function resetForm() {
               <line x1="48" y1="32" x2="60" y2="32" stroke="#f5c842" stroke-width="1" opacity="0.5" />
             </svg>
             <h3 class="font-display animate-fade-up-delay-1">消息已送出</h3>
-            <p class="font-body animate-fade-up-delay-2">
-              消息已收到，通常在 48 小时内回复。如果是代码或语言相关的问题，可以多等一会儿，我会认真想一想再回。
-            </p>
+            <p class="font-body animate-fade-up-delay-2">消息已收到，会尽快回复。</p>
             <button type="button" class="font-body" @click="resetForm">再发一条</button>
           </div>
 
@@ -100,7 +85,7 @@ function resetForm() {
             <div class="form__row">
               <label class="field">
                 <span class="font-body">你的名字</span>
-                <input v-model="form.name" type="text" placeholder="星野 凛" class="font-body" />
+                <input v-model="form.name" type="text" placeholder="怎么称呼你" class="font-body" />
               </label>
               <label class="field">
                 <span class="font-body">邮箱地址</span>
@@ -116,7 +101,7 @@ function resetForm() {
               <textarea
                 v-model="form.message"
                 rows="6"
-                placeholder="想说的话，不必太长，写清楚就好…"
+                placeholder="想说的话…"
                 class="font-body"
               />
             </label>
@@ -141,50 +126,20 @@ function resetForm() {
           </form>
         </div>
 
-        <aside class="aside">
+        <aside v-if="author.displayName || author.bio || author.avatar" class="aside">
           <div class="aside__note">
-            <p class="font-serif">
-              "能和同样在学代码或语言的人交流，是写这个博客最开心的事之一。"
-            </p>
+            <p v-if="author.bio" class="font-serif">{{ author.bio }}</p>
             <div class="aside__author">
               <div class="aside__avatar">
-                <MediaCover :src="AVATAR_IMG" alt="星野凛" label="星野凛" seed="avatar" />
+                <MediaCover
+                  :src="author.avatar"
+                  :alt="author.displayName || '作者'"
+                  :label="author.displayName || '作者'"
+                  seed="avatar"
+                />
               </div>
               <div>
-                <p class="font-display">星野 凛</p>
-                <span class="font-body">Frontend Dev · 语言 N2</span>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 class="aside__heading font-display">
-              <span class="bar" />
-              社交媒体
-              <span class="line" />
-            </h3>
-            <div class="socials">
-              <div v-for="link in socialLinks" :key="link.name" class="social">
-                <div>
-                  <div class="social__head">
-                    <span class="font-display">{{ link.name }}</span>
-                    <span class="font-body">{{ link.handle }}</span>
-                  </div>
-                  <p class="font-body">{{ link.desc }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 class="aside__heading font-display">
-              <span class="bar" />
-              常见问题
-            </h3>
-            <div class="faqs">
-              <div v-for="(faq, i) in faqs" :key="i" class="faq">
-                <p class="font-display">{{ faq.q }}</p>
-                <p class="font-body">{{ faq.a }}</p>
+                <p class="font-display">{{ author.displayName || '作者' }}</p>
               </div>
             </div>
           </div>
@@ -351,7 +306,7 @@ function resetForm() {
 .aside__note {
   padding: 1.5rem;
   border: 1px solid rgba(126, 184, 247, 0.1);
-  background: linear-gradient(145deg, rgba(11, 16, 40, 0.8), rgba(8, 12, 28, 0.9));
+  background: linear-gradient(145deg, var(--color-card), var(--color-muted));
 
   .font-serif {
     margin: 0 0 1rem;
@@ -376,7 +331,7 @@ function resetForm() {
 
   .font-body {
     font-size: 0.6rem;
-    color: #3d5070;
+    color: var(--color-quiet);
     letter-spacing: 0.05em;
   }
 }
@@ -428,7 +383,7 @@ function resetForm() {
 .social {
   padding: 0.875rem;
   border: 1px solid rgba(126, 184, 247, 0.07);
-  background: rgba(11, 16, 40, 0.4);
+  background: var(--color-surface-deep);
   cursor: pointer;
   transition: border-color 0.3s;
 
@@ -451,7 +406,7 @@ function resetForm() {
 
   .font-body {
     font-size: 0.6rem;
-    color: #3d5070;
+    color: var(--color-quiet);
     letter-spacing: 0.05em;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -462,7 +417,7 @@ function resetForm() {
 .social p {
   margin: 0;
   font-size: 0.6rem;
-  color: #3d5070;
+  color: var(--color-quiet);
   letter-spacing: 0.05em;
 }
 

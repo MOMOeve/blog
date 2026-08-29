@@ -1,8 +1,6 @@
 ﻿import type { Post } from '../types'
 
-/** 本地 Hero（与 Django seed_content 同步到 /media/site/） */
-export const HERO_IMG = '/media/site/hero.svg'
-export const AVATAR_IMG = '/media/site/avatar.svg'
+export { AVATAR_IMG, HERO_IMG, HERO_WALLPAPERS } from './site'
 
 export const posts: Post[] = [
   {

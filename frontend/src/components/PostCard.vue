@@ -73,8 +73,9 @@ function truncate(text: string, len: number) {
 <style scoped lang="less">
 .featured {
   cursor: pointer;
-  border: 1px solid rgba(126, 184, 247, 0.08);
-  background: linear-gradient(135deg, rgba(11, 16, 40, 0.9), rgba(8, 12, 28, 0.95));
+  border: 1px solid var(--color-border);
+  background: linear-gradient(135deg, var(--color-card), var(--color-card-elevated));
+  box-shadow: var(--shadow-card);
   transition: border-color 0.5s;
 
   &:hover {
@@ -212,8 +213,9 @@ function truncate(text: string, len: number) {
 
 .card {
   cursor: pointer;
-  border: 1px solid rgba(126, 184, 247, 0.08);
-  background: linear-gradient(145deg, rgba(11, 16, 40, 0.85), rgba(8, 12, 28, 0.92));
+  border: 1px solid var(--color-border);
+  background: linear-gradient(145deg, var(--color-card), var(--color-card-elevated));
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   transition: border-color 0.5s;
@@ -272,7 +274,7 @@ function truncate(text: string, len: number) {
 .card__en {
   font-style: italic;
   font-size: 0.75rem;
-  color: #3d5070;
+  color: var(--color-quiet);
   margin: 0 0 1rem;
 }
 
@@ -293,7 +295,7 @@ function truncate(text: string, len: number) {
   padding-top: 1rem;
   border-top: 1px solid rgba(126, 184, 247, 0.07);
   font-size: 0.68rem;
-  color: #3d5070;
+  color: var(--color-quiet);
   letter-spacing: 0.05em;
 }
 </style>

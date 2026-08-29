@@ -1,6 +1,8 @@
 ﻿<script setup lang="ts">
 import { ref } from 'vue'
 import { navLinks } from '../data/posts'
+import { SITE_DESC, SITE_NAME, SITE_TAGLINE } from '../data/site'
+import BrandMark from './BrandMark.vue'
 import { subscribeNewsletter } from '../api/inbox'
 import { ApiError } from '../api/client'
 import { useRouter } from '../router'
@@ -35,16 +37,11 @@ async function handleSubscribe() {
       <div class="footer__grid">
         <div>
           <div class="footer__brand">
-            <svg viewBox="0 0 28 28" fill="none" class="footer__logo">
-              <circle cx="14" cy="14" r="6" fill="none" stroke="#f5c842" stroke-width="1.5" opacity="0.8" />
-              <circle cx="14" cy="14" r="2.5" fill="#f5c842" opacity="0.9" />
-            </svg>
-            <span class="font-display">星野文记</span>
+            <BrandMark :size="28" class="footer__logo" />
+            <span class="font-display">{{ SITE_NAME }}</span>
           </div>
           <p class="footer__desc font-body">
-            记录代码与语言的学习历程。
-            <br />
-            写给未来那个回头看的自己。
+            {{ SITE_DESC }}
           </p>
         </div>
 
@@ -61,7 +58,7 @@ async function handleSubscribe() {
 
         <div>
           <h5 class="footer__heading font-display">订阅更新</h5>
-          <p class="footer__desc font-body">不错过每一次日落与文字。</p>
+          <p class="footer__desc font-body">像囤积香料一样，收好每一封新讯。</p>
           <div class="footer__subscribe">
             <input
               v-model="subscribeEmail"
@@ -87,7 +84,7 @@ async function handleSubscribe() {
       <div class="divider-light footer__divider" />
 
         <div class="footer__bottom">
-        <p class="font-body">© 2026 星野文记 · 代码与语言，慢慢来</p>
+        <p class="font-body">© 2026 {{ SITE_NAME }} · {{ SITE_TAGLINE }}</p>
         <div class="footer__socials">
           <a href="/api/v1/feed/rss/" target="_blank" rel="noopener noreferrer" class="font-body">
             RSS
@@ -107,7 +104,7 @@ async function handleSubscribe() {
 <style scoped lang="less">
 .footer {
   position: relative;
-  border-top: 1px solid rgba(126, 184, 247, 0.1);
+  border-top: 1px solid var(--color-border);
   overflow: hidden;
 }
 
@@ -115,7 +112,7 @@ async function handleSubscribe() {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(14, 21, 53, 0.3));
+  background: linear-gradient(180deg, transparent, var(--color-header-glow));
 }
 
 .footer__inner {

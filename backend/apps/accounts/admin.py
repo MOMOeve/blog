@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.auth.models import User
 
-from .models import PasswordResetToken, Profile
+from .models import PasswordResetToken, Profile, SiteAbout
 
 
 @admin.register(PasswordResetToken)
@@ -21,6 +21,11 @@ class ProfileInline(admin.StackedInline):
 
 class UserAdmin(DjangoUserAdmin):
     inlines = [ProfileInline]
+
+
+@admin.register(SiteAbout)
+class SiteAboutAdmin(admin.ModelAdmin):
+    list_display = ('id', 'tagline', 'updated_at')
 
 
 admin.site.unregister(User)

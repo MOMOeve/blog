@@ -103,8 +103,8 @@ export function useRouter() {
     push(PAGE_PATHS[page])
   }
 
-  const activePage = computed<Page>(() => {
-    const map: Record<RouteName, Page> = {
+  const activePage = computed<Page | null>(() => {
+    const map: Record<RouteName, Page | null> = {
       home: '首页',
       articles: '文章',
       'article-detail': '文章',
@@ -114,15 +114,18 @@ export function useRouter() {
       photography: '摄影',
       about: '关于',
       contact: '联系',
-      profile: '首页',
-      'reset-password': '首页',
+      profile: null,
+      'reset-password': null,
     }
     return map[currentRoute.value.name]
   })
 
+  const isProfilePage = computed(() => currentRoute.value.name === 'profile')
+
   return {
     route: readonly(currentRoute),
     activePage,
+    isProfilePage,
     push,
     replace,
     goPage,

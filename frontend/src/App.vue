@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import AppNav from './components/AppNav.vue'
 import AppFooter from './components/AppFooter.vue'
 import LoginModal from './components/LoginModal.vue'
@@ -15,11 +15,34 @@ import ProfilePage from './views/ProfilePage.vue'
 import ResetPasswordPage from './views/ResetPasswordPage.vue'
 import { useTheme } from './composables/useTheme'
 import { useAuth } from './composables/useAuth'
-import { useRouter } from './router'
+import { useRouter, type RouteName } from './router'
+import { SITE_NAME } from './data/site'
 
 useTheme()
 const { hydrateFromServer } = useAuth()
 const { route } = useRouter()
+
+const TITLE_MAP: Record<RouteName, string> = {
+  home: SITE_NAME,
+  articles: `文章 · ${SITE_NAME}`,
+  'article-detail': `文章 · ${SITE_NAME}`,
+  'article-write': `写文章 · ${SITE_NAME}`,
+  'article-edit': `编辑文章 · ${SITE_NAME}`,
+  drafts: `草稿箱 · ${SITE_NAME}`,
+  photography: `摄影 · ${SITE_NAME}`,
+  about: `关于 · ${SITE_NAME}`,
+  contact: `联系 · ${SITE_NAME}`,
+  profile: `个人资料 · ${SITE_NAME}`,
+  'reset-password': `重置密码 · ${SITE_NAME}`,
+}
+
+watch(
+  () => route.value.name,
+  (name) => {
+    document.title = TITLE_MAP[name] || SITE_NAME
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   void hydrateFromServer()
