@@ -260,7 +260,9 @@ watch(
       <div class="editor__top">
         <button type="button" class="editor__back font-body" @click="cancelEdit">← 返回</button>
         <h1 class="editor__title font-display">{{ pageTitle }}</h1>
-        <p class="editor__hint font-body">正文使用 Markdown（支持表格、代码高亮、目录、粘贴/上传图片；回车换行，空一行分段）</p>
+        <p class="editor__hint font-body">
+          正文 Markdown（GFM：表格、嵌套列表、任务列表、代码高亮；回车换行，空一行分段）
+        </p>
       </div>
 
       <div v-if="!isAuthor" class="editor__warn font-body">

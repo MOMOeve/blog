@@ -422,8 +422,23 @@ img {
     padding-left: 1.4em;
   }
 
+  ul ul,
+  ol ol,
+  ul ol,
+  ol ul {
+    margin: 0.25em 0;
+  }
+
   li {
     margin: 0.25em 0;
+  }
+
+  li > p {
+    margin: 0.2em 0;
+  }
+
+  input[type='checkbox'] {
+    margin-right: 0.4em;
   }
 
   blockquote {
@@ -472,21 +487,42 @@ img {
     background: rgba(126, 184, 247, 0.05);
   }
 
-  .md-hl-keyword {
-    color: #f5c842;
+  .md-hl-keyword,
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-built_in,
+  .hljs-type {
+    color: var(--color-primary);
   }
 
-  .md-hl-string {
-    color: #7eb8f7;
+  .md-hl-string,
+  .hljs-string,
+  .hljs-attr,
+  .hljs-template-variable {
+    color: var(--color-secondary);
   }
 
-  .md-hl-comment {
+  .md-hl-comment,
+  .hljs-comment,
+  .hljs-quote {
     color: var(--color-faint);
     font-style: italic;
   }
 
-  .md-hl-number {
-    color: #c4a0d8;
+  .md-hl-number,
+  .hljs-number,
+  .hljs-literal {
+    color: #d4b49a;
+  }
+
+  .hljs-title,
+  .hljs-section {
+    color: #e2cfc4;
+  }
+
+  .hljs-meta,
+  .hljs-subst {
+    color: var(--color-soft);
   }
 
   h2,
