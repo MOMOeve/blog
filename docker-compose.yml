@@ -47,6 +47,8 @@ services:
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost,http://127.0.0.1}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}
       RUN_SEED: ${RUN_SEED:-1}
+      SITE_AUTHOR_USERNAME: ${SITE_AUTHOR_USERNAME:-}
+      SITE_AUTHOR_EMAIL: ${SITE_AUTHOR_EMAIL:-}
     volumes:
       - media_data:/app/media
       - static_data:/app/staticfiles

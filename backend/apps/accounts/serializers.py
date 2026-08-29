@@ -69,7 +69,27 @@ class ProfileUpdateSerializer(serializers.Serializer):
 
 
 def resolve_site_author():
-    """侧栏/关于页作者：排除演示账号，优先 author 角色与超级用户。"""
+    """侧栏/关于页作者：可按环境变量固定账号；否则排除演示账号后优先 author / 超管。"""
+    from django.conf import settings
+
+    pinned = None
+    username = getattr(settings, 'SITE_AUTHOR_USERNAME', '') or ''
+    email = getattr(settings, 'SITE_AUTHOR_EMAIL', '') or ''
+    if username:
+        pinned = (
+            User.objects.filter(username__iexact=username, is_active=True)
+            .select_related('profile')
+            .first()
+        )
+    if not pinned and email:
+        pinned = (
+            User.objects.filter(email__iexact=email, is_active=True)
+            .select_related('profile')
+            .first()
+        )
+    if pinned:
+        return pinned
+
     qs = (
         User.objects.filter(is_staff=True, is_active=True)
         .exclude(username__iexact='demo')

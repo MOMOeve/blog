@@ -166,3 +166,6 @@ EMAIL_BACKEND = env(
 )
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@hoshino.local')
 FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:8080')
+# 游客可见的站点作者（侧栏/关于页）；优先按用户名或邮箱匹配
+SITE_AUTHOR_USERNAME = env('SITE_AUTHOR_USERNAME', default='').strip()
+SITE_AUTHOR_EMAIL = env('SITE_AUTHOR_EMAIL', default='').strip()
