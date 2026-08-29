@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { navLinks } from '../data/posts'
+import { SITE_NAME } from '../data/site'
+import BrandMark from './BrandMark.vue'
 import { useTheme } from '../composables/useTheme'
 import { useAuth } from '../composables/useAuth'
 import { useRouter } from '../router'
@@ -12,6 +14,10 @@ const { theme, toggleTheme } = useTheme()
 const { isLoggedIn, isAuthor, user, openLogin, logout } = useAuth()
 const { activePage, push, paths, route } = useRouter()
 const isDraftsPage = computed(() => route.value.name === 'drafts')
+const isProfilePage = computed(() => route.value.name === 'profile')
+const isWritePage = computed(
+  () => route.value.name === 'article-write' || route.value.name === 'article-edit',
+)
 
 function go(path: string) {
   push(path)
@@ -45,16 +51,8 @@ function onSearchKeydown(e: KeyboardEvent) {
   <nav class="nav nav-blur">
     <div class="nav__inner">
       <button class="nav__logo" type="button" @click="go('/')">
-        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav__logo-icon">
-          <circle cx="14" cy="14" r="12" stroke="#7eb8f7" stroke-width="1" opacity="0.4" />
-          <circle cx="14" cy="14" r="6" fill="none" stroke="#f5c842" stroke-width="1.5" opacity="0.8" />
-          <line x1="14" y1="2" x2="14" y2="8" stroke="#7eb8f7" stroke-width="1" opacity="0.5" />
-          <line x1="14" y1="20" x2="14" y2="26" stroke="#7eb8f7" stroke-width="1" opacity="0.5" />
-          <line x1="2" y1="14" x2="8" y2="14" stroke="#7eb8f7" stroke-width="1" opacity="0.5" />
-          <line x1="20" y1="14" x2="26" y2="14" stroke="#7eb8f7" stroke-width="1" opacity="0.5" />
-          <circle cx="14" cy="14" r="2.5" fill="#f5c842" opacity="0.9" />
-        </svg>
-        <span class="nav__brand font-display">星野文记</span>
+        <BrandMark :size="28" />
+        <span class="nav__brand font-display">{{ SITE_NAME }}</span>
       </button>
 
       <ul class="nav__links">
@@ -128,13 +126,20 @@ function onSearchKeydown(e: KeyboardEvent) {
             v-if="isAuthor"
             type="button"
             class="nav__write-btn font-body"
+            :class="{ 'is-active': isWritePage }"
             @click="go(paths.write())"
           >
             写文章
           </button>
-          <button type="button" class="nav__user-name font-body nav__profile-link" @click="go(paths.profile())">
-            {{ user?.displayName }}
+          <button
+            type="button"
+            class="nav__write-btn font-body"
+            :class="{ 'is-active': isProfilePage }"
+            @click="go(paths.profile())"
+          >
+            个人资料
           </button>
+          <span class="nav__user-name font-body">{{ user?.displayName }}</span>
           <button type="button" class="nav__login-btn font-body" @click="logout">退出</button>
         </div>
         <button v-else type="button" class="nav__login-btn font-body" @click="openLogin">登录</button>
@@ -240,6 +245,7 @@ function onSearchKeydown(e: KeyboardEvent) {
   z-index: 50;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-nav-bg);
+  box-shadow: var(--shadow-nav);
 }
 
 .nav__inner {
@@ -256,11 +262,6 @@ function onSearchKeydown(e: KeyboardEvent) {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-}
-
-.nav__logo-icon {
-  width: 1.75rem;
-  height: 1.75rem;
 }
 
 .nav__brand {
@@ -372,8 +373,7 @@ function onSearchKeydown(e: KeyboardEvent) {
   }
 }
 
-.nav__user-name,
-.nav__profile-link {
+.nav__user-name {
   font-size: 0.75rem;
   color: var(--color-soft);
   letter-spacing: 0.08em;
@@ -381,17 +381,6 @@ function onSearchKeydown(e: KeyboardEvent) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.nav__profile-link {
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s;
-
-  &:hover {
-    color: var(--color-fg);
-  }
 }
 
 .nav__menu-btn {

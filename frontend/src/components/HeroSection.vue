@@ -1,10 +1,32 @@
 ﻿<script setup lang="ts">
-import { HERO_IMG } from '../data/posts'
-import MediaCover from './MediaCover.vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { HERO_WALLPAPERS } from '../data/site'
 
 defineEmits<{
   'read-more': []
 }>()
+
+const index = ref(0)
+const fading = ref(false)
+let timer: ReturnType<typeof setInterval> | null = null
+
+const current = computed(() => HERO_WALLPAPERS[index.value] ?? HERO_WALLPAPERS[0])
+const canRotate = HERO_WALLPAPERS.length > 1
+
+onMounted(() => {
+  if (!canRotate) return
+  timer = setInterval(() => {
+    fading.value = true
+    window.setTimeout(() => {
+      index.value = (index.value + 1) % HERO_WALLPAPERS.length
+      fading.value = false
+    }, 500)
+  }, 10000)
+})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
 
 const particles = [
   { cx: '15%', cy: '25%', r: 1.5, delay: '0s' },
@@ -18,8 +40,8 @@ const particles = [
 
 <template>
   <section class="hero">
-    <div class="hero__bg">
-      <MediaCover :src="HERO_IMG" alt="黄昏天空" label="星野文记" seed="hero" />
+    <div class="hero__bg" :class="{ 'is-fading': fading }">
+      <img class="hero__wallpaper" :src="current" alt="首页壁纸" />
     </div>
     <div class="hero__grad-v" />
     <div class="hero__grad-h" />
@@ -27,14 +49,14 @@ const particles = [
     <svg class="hero__rays" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
       <defs>
         <linearGradient id="ray1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#f5c842" stop-opacity="0" />
-          <stop offset="50%" stop-color="#f5c842" stop-opacity="0.12" />
-          <stop offset="100%" stop-color="#f5c842" stop-opacity="0" />
+          <stop offset="0%" stop-color="#743031" stop-opacity="0" />
+          <stop offset="50%" stop-color="#743031" stop-opacity="0.2" />
+          <stop offset="100%" stop-color="#743031" stop-opacity="0" />
         </linearGradient>
         <linearGradient id="ray2" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#7eb8f7" stop-opacity="0" />
-          <stop offset="50%" stop-color="#7eb8f7" stop-opacity="0.07" />
-          <stop offset="100%" stop-color="#7eb8f7" stop-opacity="0" />
+          <stop offset="0%" stop-color="#d4b49a" stop-opacity="0" />
+          <stop offset="50%" stop-color="#d4b49a" stop-opacity="0.12" />
+          <stop offset="100%" stop-color="#d4b49a" stop-opacity="0" />
         </linearGradient>
       </defs>
       <polygon class="light-ray" points="30%,0 55%,0 78%,100% 5%,100%" fill="url(#ray1)" />
@@ -59,7 +81,7 @@ const particles = [
         :cx="p.cx"
         :cy="p.cy"
         :r="p.r"
-        fill="#f5c842"
+        fill="#d4b49a"
         opacity="0.7"
         :style="{ animation: `particleFloat 6s ${p.delay} ease-in-out infinite` }"
       />
@@ -67,24 +89,24 @@ const particles = [
 
     <div class="hero__content">
       <div class="hero__copy">
-        <p class="hero__eyebrow font-body animate-fade-up">✦ &nbsp; 代码 · 语言 · 生活记录</p>
+        <p class="hero__eyebrow font-body animate-fade-up">✦ &nbsp; 旅途 · 麦香 · 算计</p>
         <h1 class="hero__title font-display animate-fade-up-delay-1">
-          <span class="gold-shimmer">学习这件事，没有终点</span>
+          <span class="gold-shimmer">智慧是最好的香料</span>
           <br />
-          <span class="hero__subtitle">只有一个又一个的此刻</span>
+          <span class="hero__subtitle">在漫长的旅途上慢慢攒下</span>
         </h1>
         <p class="hero__desc font-body animate-fade-up-delay-2">
-          记录写代码时的思考与踩坑，以及学语言路上那些笨拙而真实的进步。 偶尔也写一点生活里细小的事。
+          像旅商一样记下沿途所见：代码里的坑，语言里的文法，以及那些值得一笑的买卖与收获。
         </p>
         <div class="hero__cta animate-fade-up-delay-3">
           <button type="button" class="hero__btn font-body" @click="$emit('read-more')">
-            阅读全文
+            翻开手记
             <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
               <line x1="0" y1="5" x2="13" y2="5" stroke="currentColor" stroke-width="1.2" />
               <polyline points="9,1 13,5 9,9" fill="none" stroke="currentColor" stroke-width="1.2" />
             </svg>
           </button>
-          <span class="font-body">10 分钟阅读</span>
+          <span class="font-body">顺着麦浪向下走</span>
         </div>
       </div>
     </div>
@@ -110,11 +132,20 @@ const particles = [
   position: absolute;
   inset: 0;
   background: var(--color-card);
+  transition: opacity 0.5s ease;
 
-  :deep(.media-cover__img),
-  :deep(.media-cover__ph) {
-    filter: saturate(1.15) brightness(0.55);
+  &.is-fading {
+    opacity: 0.35;
   }
+}
+
+.hero__wallpaper {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  filter: saturate(1.08) brightness(0.72);
 }
 
 .hero__grad-v {
@@ -122,17 +153,22 @@ const particles = [
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(18, 26, 46, 0.2) 0%,
-    rgba(18, 26, 46, 0.05) 35%,
-    rgba(18, 26, 46, 0.55) 70%,
-    rgba(18, 26, 46, 0.92) 100%
+    var(--color-hero-scrim-soft) 0%,
+    transparent 35%,
+    var(--color-hero-scrim-mid) 70%,
+    var(--color-hero-scrim) 100%
   );
 }
 
 .hero__grad-h {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(18, 26, 46, 0.5) 0%, transparent 50%, rgba(18, 26, 46, 0.2) 100%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-hero-scrim) 55%, transparent) 0%,
+    transparent 50%,
+    var(--color-hero-scrim-soft) 100%
+  );
 }
 
 .hero__rays,
@@ -163,9 +199,9 @@ const particles = [
 .hero__eyebrow {
   font-size: 0.75rem;
   letter-spacing: 0.35em;
-  color: var(--color-secondary);
+  color: color-mix(in srgb, var(--color-secondary) 85%, #fff);
   margin: 0 0 1.25rem;
-  opacity: 0.8;
+  opacity: 0.95;
 }
 
 .hero__title {
@@ -176,14 +212,14 @@ const particles = [
 }
 
 .hero__subtitle {
-  color: var(--color-fg);
+  color: var(--color-on-media);
   font-size: 0.6em;
   font-weight: 300;
   letter-spacing: 0.08em;
 }
 
 .hero__desc {
-  color: var(--color-soft);
+  color: var(--color-on-media-muted);
   font-size: 1rem;
   line-height: 1.8;
   font-weight: 300;
@@ -198,7 +234,7 @@ const particles = [
 
   span {
     font-size: 0.75rem;
-    color: var(--color-dim);
+    color: var(--color-on-media-muted);
     letter-spacing: 0.1em;
   }
 }
@@ -209,8 +245,8 @@ const particles = [
   gap: 0.75rem;
   font-size: 0.875rem;
   letter-spacing: 0.18em;
-  color: var(--color-primary);
-  border: 1px solid rgba(245, 200, 66, 0.35);
+  color: #f3e8e2;
+  border: 1px solid rgba(243, 232, 226, 0.45);
   padding: 0.75rem 1.5rem;
   transition: all 0.3s;
 
@@ -219,8 +255,8 @@ const particles = [
   }
 
   &:hover {
-    background: rgba(245, 200, 66, 0.08);
-    border-color: rgba(245, 200, 66, 0.6);
+    background: rgba(116, 48, 49, 0.35);
+    border-color: rgba(243, 232, 226, 0.75);
 
     svg {
       transform: translateX(4px);
@@ -260,6 +296,6 @@ const particles = [
 .hero__scroll-line {
   width: 1px;
   height: 3rem;
-  background: linear-gradient(to bottom, #7eb8f7, transparent);
+  background: linear-gradient(to bottom, var(--color-secondary), transparent);
 }
 </style>

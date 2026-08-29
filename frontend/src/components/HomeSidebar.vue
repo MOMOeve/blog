@@ -1,26 +1,52 @@
 ﻿<script setup lang="ts">
-import { posts, sidebarTags, AVATAR_IMG } from '../data/posts'
+import { computed, onMounted, ref } from 'vue'
+import { fetchSiteAuthor, type SiteAuthor } from '../api/auth'
+import { posts as fallbackPosts } from '../data/posts'
+import type { Post } from '../types'
 import { useRouter } from '../router'
 import MediaCover from './MediaCover.vue'
 
+const props = withDefaults(
+  defineProps<{ posts?: Post[] }>(),
+  { posts: undefined },
+)
+
 const { push, paths } = useRouter()
-const recent = posts.slice(0, 3)
+const author = ref<SiteAuthor>({ displayName: '', bio: '', avatar: '' })
+const recent = computed(() => (props.posts ?? fallbackPosts).slice(0, 3))
+const tags = computed(() => {
+  const source = props.posts ?? []
+  return Array.from(new Set(source.flatMap((p) => p.tags))).slice(0, 12)
+})
+
+onMounted(async () => {
+  try {
+    author.value = await fetchSiteAuthor()
+  } catch {
+    /* keep empty */
+  }
+})
 </script>
 
 <template>
   <aside class="sidebar">
     <div class="sidebar__profile">
       <div class="sidebar__avatar">
-        <MediaCover :src="AVATAR_IMG" alt="作者头像" label="星野凛" seed="avatar" />
+        <MediaCover
+          :src="author.avatar"
+          :alt="author.displayName || '作者头像'"
+          :label="author.displayName || '作者'"
+          seed="avatar"
+        />
       </div>
-      <h4 class="font-display">星野凛</h4>
-      <p class="font-body">代码 · 语言 · 生活记录</p>
+      <h4 class="font-display">{{ author.displayName || '作者' }}</h4>
       <div class="divider-light" />
-      <p class="sidebar__bio font-body">写代码、学语言，记录每一个搞懂了一件小事的瞬间。</p>
+      <p v-if="author.bio" class="sidebar__bio font-body">{{ author.bio }}</p>
+      <p v-else class="sidebar__bio font-body">简介尚未填写</p>
       <button type="button" class="sidebar__about font-body" @click="push(paths.about())">了解更多</button>
     </div>
 
-    <div>
+    <div v-if="recent.length">
       <h4 class="sidebar__heading font-display">
         <span class="bar" />
         最近发布
@@ -39,23 +65,16 @@ const recent = posts.slice(0, 3)
       </ul>
     </div>
 
-    <div>
+    <div v-if="tags.length">
       <h4 class="sidebar__heading font-display">
         <span class="bar" />
         标签云
         <span class="line" />
       </h4>
       <div class="sidebar__tags">
-        <button v-for="tag in sidebarTags" :key="tag" type="button" class="tag-pill"># {{ tag }}</button>
+        <button v-for="tag in tags" :key="tag" type="button" class="tag-pill"># {{ tag }}</button>
       </div>
     </div>
-
-    <blockquote class="sidebar__quote">
-      <p class="font-serif">
-        "プログラミングも言語も、<br />最初は全部わからなくていい。<br />毎日少しずつ。"
-      </p>
-      <cite class="font-body">— 写给还在路上的自己</cite>
-    </blockquote>
   </aside>
 </template>
 
@@ -68,8 +87,9 @@ const recent = posts.slice(0, 3)
 
 .sidebar__profile {
   padding: 1.5rem;
-  border: 1px solid rgba(126, 184, 247, 0.1);
-  background: linear-gradient(145deg, rgba(11, 16, 40, 0.8), rgba(8, 12, 28, 0.9));
+  border: 1px solid var(--color-border);
+  background: linear-gradient(145deg, var(--color-card), var(--color-muted));
+  box-shadow: var(--shadow-card);
   text-align: center;
 
   h4 {
@@ -207,7 +227,7 @@ const recent = posts.slice(0, 3)
   span {
     display: block;
     font-size: 0.65rem;
-    color: #3d5070;
+    color: var(--color-quiet);
     margin-top: 0.25rem;
     letter-spacing: 0.05em;
   }

@@ -1,82 +1,67 @@
 ﻿<script setup lang="ts">
-import { AVATAR_IMG } from '../data/posts'
+import { computed, onMounted, ref } from 'vue'
+import { fetchSiteAbout, type SiteAbout } from '../api/auth'
+import { useAuth } from '../composables/useAuth'
+import { useRouter } from '../router'
 import MediaCover from '../components/MediaCover.vue'
 
-const timeline = [
-  {
-    year: '2020',
-    title: '写下第一行代码',
-    desc: '大学选修了一门 Python 课，交了第一份作业之后就再也停不下来了。那时候完全不知道自己在做什么，但调试成功的瞬间让人上瘾。',
-  },
-  {
-    year: '2021',
-    title: '开始自学前端',
-    desc: 'HTML、CSS、JavaScript——一边跟着教程敲，一边做自己的小项目。踩了很多坑，学会了如何 Google 错误信息。',
-  },
-  {
-    year: '2022',
-    title: '语言学习起步',
-    desc: '因为喜欢看动画和玩游戏，决定正式开始学语言。五十音图背了两遍才记住，ひらがな 写得歪歪扭扭，但很快就爱上了这门语言。',
-  },
-  {
-    year: '2023',
-    title: '通过 JLPT N3',
-    desc: '备考四个月，N3 一次通过。意识到语言学习和编程有很多相通之处——都需要大量输入，都需要在实际使用中犯错，都无法靠死记硬背掌握。',
-  },
-  {
-    year: '2024',
-    title: '第一个上线的个人项目',
-    desc: 'React + Node.js，从域名注册到部署用了快两个月。虽然没什么人用，但从那之后对整个 web 开发的链路有了完整的理解。',
-  },
-  {
-    year: '2025',
-    title: '通过 JLPT N2，开始写这个博客',
-    desc: 'N2 通过之后决定把学习过程和代码笔记记录下来。写给未来的自己看，也希望对同样在路上的人有一点用。',
-  },
-]
+const emptyAbout = (): SiteAbout => ({
+  displayName: '',
+  avatar: '',
+  tagline: '',
+  quote: '',
+  body: '',
+  focusTags: [],
+  stats: [],
+  timeline: [],
+  timelineSubtitle: '',
+  influences: [],
+  techStack: [],
+  stackNote: '',
+})
 
-const influences = [
-  {
-    name: 'Dan Abramov',
-    field: 'React / 写作',
-    quote: "Don't try to be clever. Write code that communicates.",
-  },
-  {
-    name: 'Matt Pocock',
-    field: 'TypeScript',
-    quote: "TypeScript is not about restrictions. It's about communication.",
-  },
-  {
-    name: '核心语言',
-    field: '语言学习',
-    quote: '语言学习最重要的是大量可理解输入，其次是开口用它。',
-  },
-  {
-    name: 'Paul Graham',
-    field: '写作 / 思维',
-    quote: 'Writing is not just a way to communicate ideas. Writing is how you think.',
-  },
-]
+const { isStaff } = useAuth()
+const { push, paths } = useRouter()
+const about = ref<SiteAbout>(emptyAbout())
+const loading = ref(true)
 
-const techStack = [
-  { name: 'TypeScript + React', type: '主力前端' },
-  { name: 'Node.js + Hono', type: '后端' },
-  { name: 'PostgreSQL + Prisma', type: '数据库' },
-  { name: 'Neovim + VS Code', type: '编辑器' },
-  { name: 'Wezterm + zsh', type: '终端' },
-  { name: 'Anki + Immersion Kit', type: '语言工具' },
-  { name: 'WaniKani', type: '汉字记忆' },
-  { name: 'Obsidian', type: '笔记' },
-]
+const bioParagraphs = computed(() =>
+  about.value.body
+    .split(/\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean),
+)
 
-const stats = [
-  { label: '语言学习', value: 'N2', sub: '目标 N1' },
-  { label: '前端经验', value: '4 年', sub: '自学起步' },
-  { label: 'Anki 卡片', value: '6,200+', sub: '累计复习' },
-  { label: '个人项目', value: '11 个', sub: '3 个在用' },
-]
+const hasProfile = computed(
+  () =>
+    Boolean(
+      about.value.displayName ||
+        about.value.avatar ||
+        about.value.tagline ||
+        about.value.quote ||
+        about.value.body ||
+        about.value.stats.length ||
+        about.value.focusTags.length,
+    ),
+)
 
-const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learning', 'side projects']
+const hasLower = computed(
+  () =>
+    about.value.timeline.length > 0 ||
+    about.value.influences.length > 0 ||
+    about.value.techStack.length > 0 ||
+    Boolean(about.value.stackNote),
+)
+
+onMounted(async () => {
+  try {
+    about.value = await fetchSiteAbout()
+  } catch {
+    /* keep empty */
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
@@ -88,123 +73,140 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
         <p class="page-eyebrow">✦ &nbsp; ABOUT</p>
         <h1 class="page-title">
           关于
-          <span class="page-title__sub">· 一点自述</span>
+          <span class="page-title__sub">· 旅伴自述</span>
         </h1>
       </div>
     </div>
 
-    <div class="container about__profile">
-      <div class="about__layout">
-        <div class="about__aside">
-          <div class="about__avatar">
-            <MediaCover :src="AVATAR_IMG" alt="作者" label="星野凛" seed="avatar" />
+    <div v-if="loading" class="container about__empty font-body">加载中…</div>
+
+    <template v-else>
+      <div v-if="!hasProfile && !hasLower" class="container about__empty">
+        <p class="font-body">暂无介绍内容。</p>
+        <button
+          v-if="isStaff"
+          type="button"
+          class="about__cta font-body"
+          @click="push(paths.profile())"
+        >
+          前往个人资料配置关于页
+        </button>
+      </div>
+
+      <div v-if="hasProfile" class="container about__profile">
+        <div class="about__layout">
+          <div class="about__aside">
+            <div class="about__avatar">
+              <MediaCover
+                :src="about.avatar"
+                :alt="about.displayName || '作者'"
+                :label="about.displayName || '作者'"
+                seed="avatar"
+              />
+            </div>
+            <div class="about__identity">
+              <h2 class="font-display">{{ about.displayName || '未命名' }}</h2>
+              <p v-if="about.tagline" class="font-body about__tagline">{{ about.tagline }}</p>
+              <div v-if="about.stats.length || isStaff" class="about__rule" />
+              <div v-if="about.stats.length" class="about__stats">
+                <div v-for="s in about.stats" :key="s.label + s.value" class="stat">
+                  <p class="font-display">{{ s.value }}</p>
+                  <p class="font-body">{{ s.label }}</p>
+                  <span v-if="s.sub" class="font-body">{{ s.sub }}</span>
+                </div>
+              </div>
+              <button
+                v-if="isStaff"
+                type="button"
+                class="about__cta font-body"
+                @click="push(paths.profile())"
+              >
+                编辑关于页
+              </button>
+            </div>
           </div>
-          <div class="about__identity">
-            <h2 class="font-display">星野 凛</h2>
-            <p class="font-body">Frontend Dev · 语言学习者</p>
-            <div class="about__rule" />
-            <div class="about__stats">
-              <div v-for="s in stats" :key="s.label" class="stat">
-                <p class="font-display">{{ s.value }}</p>
-                <p class="font-body">{{ s.label }}</p>
-                <span class="font-body">{{ s.sub }}</span>
+
+          <div class="about__bio">
+            <blockquote v-if="about.quote" class="font-serif">
+              "{{ about.quote }}"
+            </blockquote>
+            <div v-if="bioParagraphs.length" class="about__text font-body">
+              <p v-for="(p, i) in bioParagraphs" :key="i">{{ p }}</p>
+            </div>
+            <div v-if="about.focusTags.length" class="about__tags">
+              <span v-for="tag in about.focusTags" :key="tag" class="font-body">{{ tag }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="hasLower" class="container">
+        <div class="divider-light about__divider" />
+      </div>
+
+      <div v-if="about.timeline.length" class="container about__timeline">
+        <h2 class="section-title font-display">
+          <span class="bar" />
+          学习时间线
+          <span v-if="about.timelineSubtitle" class="sub font-serif">· {{ about.timelineSubtitle }}</span>
+        </h2>
+        <div class="timeline">
+          <div v-for="(item, i) in about.timeline" :key="i" class="timeline__item">
+            <div class="timeline__dot" />
+            <div class="timeline__content">
+              <span class="font-body year">{{ item.year }}</span>
+              <div>
+                <h3 class="font-display">{{ item.title }}</h3>
+                <p class="font-body">{{ item.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-if="about.influences.length || about.techStack.length || about.stackNote"
+        class="container about__cols"
+      >
+        <div v-if="about.influences.length">
+          <h2 class="section-title font-display">
+            <span class="bar" />
+            影响我的人和资源
+          </h2>
+          <div class="influences">
+            <div v-for="(inf, i) in about.influences" :key="i" class="influence">
+              <div class="influence__avatar font-display">{{ inf.name?.[0] || '?' }}</div>
+              <div>
+                <div class="influence__head">
+                  <span class="font-display">{{ inf.name }}</span>
+                  <span v-if="inf.field" class="font-body">· {{ inf.field }}</span>
+                </div>
+                <p class="font-serif">"{{ inf.quote }}"</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="about__bio">
-          <blockquote class="font-serif">
-            "代码和语言，都是我试图理解世界的方式。<br />
-            一个用逻辑，一个用语言。"
-          </blockquote>
-          <div class="about__text font-body">
-            <p>
-              我是一名自学前端开发者，同时也是一个语言学习者。技术栈以 TypeScript 和 React 为主，
-              目前也在探索后端和全栈方向。代码对我来说不只是一门谋生技能，更是一种思考和创作的方式。
-            </p>
-            <p>
-              学语言起初只是为了能看懂字幕，后来越学越深，现在已经通过了 JLPT N2，
-              正在备考 N1。语言让我意识到：语言是文化的容器，每学会一种新的表达，
-              就像是打开了看世界的一个新角度。
-            </p>
-            <p>
-              这个博客是我的学习记录和思考出口。我不是什么权威，只是一个在路上的人，
-              把走过的弯路和想清楚的事情写下来。如果对你也有用，那就更好了。
-            </p>
-          </div>
-          <div class="about__tags">
-            <span v-for="tag in focusTags" :key="tag" class="font-body">{{ tag }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="container">
-      <div class="divider-light about__divider" />
-    </div>
-
-    <div class="container about__timeline">
-      <h2 class="section-title font-display">
-        <span class="bar" />
-        学习时间线
-        <span class="sub font-serif">· 从第一行代码到现在</span>
-      </h2>
-      <div class="timeline">
-        <div v-for="(item, i) in timeline" :key="i" class="timeline__item">
-          <div class="timeline__dot" />
-          <div class="timeline__content">
-            <span class="font-body year">{{ item.year }}</span>
-            <div>
-              <h3 class="font-display">{{ item.title }}</h3>
-              <p class="font-body">{{ item.desc }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="container about__cols">
-      <div>
-        <h2 class="section-title font-display">
-          <span class="bar" />
-          影响我的人和资源
-        </h2>
-        <div class="influences">
-          <div v-for="(inf, i) in influences" :key="i" class="influence">
-            <div class="influence__avatar font-display">{{ inf.name[0] }}</div>
-            <div>
-              <div class="influence__head">
-                <span class="font-display">{{ inf.name }}</span>
-                <span class="font-body">· {{ inf.field }}</span>
+        <div v-if="about.techStack.length || about.stackNote">
+          <h2 class="section-title font-display">
+            <span class="bar" />
+            工具与技术栈
+          </h2>
+          <div class="stack">
+            <div v-for="(item, i) in about.techStack" :key="i" class="stack__row">
+              <div>
+                <span class="dot" />
+                <span class="name">{{ item.name }}</span>
               </div>
-              <p class="font-serif">"{{ inf.quote }}"</p>
+              <span class="type font-body">{{ item.type }}</span>
             </div>
+          </div>
+          <div v-if="about.stackNote" class="stack__note">
+            <p class="font-serif">{{ about.stackNote }}</p>
           </div>
         </div>
       </div>
-
-      <div>
-        <h2 class="section-title font-display">
-          <span class="bar" />
-          工具与技术栈
-        </h2>
-        <div class="stack">
-          <div v-for="(item, i) in techStack" :key="i" class="stack__row">
-            <div>
-              <span class="dot" />
-              <span class="name">{{ item.name }}</span>
-            </div>
-            <span class="type font-body">{{ item.type }}</span>
-          </div>
-        </div>
-        <div class="stack__note">
-          <p class="font-serif">
-            工具会过时，但思考问题的方式不会。 选工具，选那个让你把精力放在真正重要的事情上的那个。
-          </p>
-        </div>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -266,6 +268,13 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
     margin: 0 0 0.125rem;
   }
 
+  > .about__tagline {
+    font-size: 0.75rem;
+    color: var(--color-secondary);
+    letter-spacing: 0.2em;
+    margin: 0.35rem 0 0;
+  }
+
   > .font-body {
     font-size: 0.75rem;
     color: var(--color-secondary);
@@ -276,7 +285,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
 
 .about__rule {
   height: 1px;
-  margin-bottom: 1.25rem;
+  margin: 1.25rem 0;
   background: linear-gradient(90deg, rgba(245, 200, 66, 0.3), transparent);
 }
 
@@ -289,7 +298,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
 .stat {
   padding: 0.75rem;
   border: 1px solid rgba(126, 184, 247, 0.1);
-  background: rgba(11, 16, 40, 0.5);
+  background: var(--color-surface-deep);
 
   .font-display {
     font-size: 1rem;
@@ -310,7 +319,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
   span {
     display: block;
     font-size: 0.58rem;
-    color: #2f3f56;
+    color: var(--color-quiet-deep);
     letter-spacing: 0.05em;
     margin-top: 0.125rem;
   }
@@ -326,6 +335,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
     font-size: 1.125rem;
     color: var(--color-soft);
     line-height: 2;
+    white-space: pre-line;
   }
 }
 
@@ -340,6 +350,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
 
   p {
     margin: 0;
+    white-space: pre-wrap;
   }
 }
 
@@ -385,7 +396,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
 
   .sub {
     font-style: italic;
-    color: #3d5070;
+    color: var(--color-quiet);
     font-size: 0.875rem;
     font-weight: 400;
   }
@@ -479,6 +490,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
 .about__cols {
   display: grid;
   gap: 2.5rem;
+  padding-bottom: 4rem;
 
   @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr;
@@ -496,7 +508,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
   gap: 1rem;
   padding: 1rem;
   border: 1px solid rgba(126, 184, 247, 0.07);
-  background: rgba(11, 16, 40, 0.5);
+  background: var(--color-surface-deep);
   transition: border-color 0.3s;
 
   &:hover {
@@ -530,7 +542,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
 
   .font-body {
     font-size: 0.6rem;
-    color: #3d5070;
+    color: var(--color-quiet);
     letter-spacing: 0.05em;
   }
 }
@@ -574,7 +586,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
 
   .type {
     font-size: 0.65rem;
-    color: #3d5070;
+    color: var(--color-quiet);
     letter-spacing: 0.05em;
   }
 
@@ -594,7 +606,7 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
   margin-top: 2rem;
   padding: 1.25rem;
   border: 1px solid rgba(126, 184, 247, 0.1);
-  background: linear-gradient(135deg, rgba(11, 16, 40, 0.7), rgba(8, 12, 28, 0.8));
+  background: linear-gradient(135deg, var(--color-card), var(--color-muted));
 
   p {
     margin: 0;
@@ -603,5 +615,41 @@ const focusTags = ['React', 'TypeScript', 'Hono', '语言 N1', 'immersion learni
     color: var(--color-muted-fg);
     line-height: 1.8;
   }
+}
+
+.about__empty {
+  padding: 4rem 0;
+  text-align: center;
+  color: var(--color-dim);
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.about__cta {
+  margin-top: 1.25rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(245, 200, 66, 0.35);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: var(--color-primary);
+    background: rgba(245, 200, 66, 0.08);
+  }
+}
+
+.about__stats + .about__cta {
+  margin-top: 1.25rem;
 }
 </style>

@@ -18,9 +18,10 @@ const { isStaff, openLogin } = useAuth()
 
 const activeCategory = ref('全部')
 const lightboxPhoto = ref<Photo | null>(null)
-const photos = ref<Photo[]>(fallbackPhotos)
-const photoCategories = ref<string[]>(fallbackCategories)
+const photos = ref<Photo[]>([])
+const photoCategories = ref<string[]>(['全部'])
 const useRemote = ref(false)
+const loading = ref(true)
 
 const showEditor = ref(false)
 const isNewPhoto = ref(false)
@@ -48,14 +49,18 @@ const filtered = computed(() =>
 )
 
 async function loadPhotos() {
+  loading.value = true
   try {
     const remote = await fetchPhotos({ category: activeCategory.value })
-    if (remote.length || useRemote.value) {
-      photos.value = remote
-      useRemote.value = true
-    }
+    photos.value = remote
+    useRemote.value = true
   } catch {
-    /* keep fallback */
+    if (!useRemote.value) {
+      photos.value = fallbackPhotos
+      photoCategories.value = fallbackCategories
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -214,9 +219,9 @@ watch(activeCategory, () => {
         <p class="page-eyebrow animate-fade-up">✦ &nbsp; PHOTOGRAPHY</p>
         <h1 class="page-title animate-fade-up-delay-1">
           摄影
-          <span class="page-title__sub">· 光的记忆</span>
+          <span class="page-title__sub">· 路上的风景</span>
         </h1>
-        <p class="page-desc animate-fade-up-delay-2">用镜头捕捉那些一旦错过便永不复返的光</p>
+        <p class="page-desc animate-fade-up-delay-2">把旅途中遇见的光，收进行囊</p>
         <button
           v-if="isStaff"
           type="button"
@@ -240,10 +245,12 @@ watch(activeCategory, () => {
         >
           {{ cat }}
         </button>
-        <span class="photo__count font-body">{{ filtered.length }} 张照片</span>
+        <span class="photo__count font-body">{{ loading ? '加载中…' : `${filtered.length} 张照片` }}</span>
       </div>
 
-      <div class="photo__masonry">
+      <p v-if="loading" class="photo__loading font-body">加载中…</p>
+      <p v-else-if="!filtered.length" class="photo__empty font-body">暂无照片</p>
+      <div v-else class="photo__masonry">
         <div
           v-for="photo in filtered"
           :key="photo.id"
@@ -457,8 +464,17 @@ watch(activeCategory, () => {
 .photo__count {
   margin-left: auto;
   font-size: 0.75rem;
-  color: #2f3f56;
+  color: var(--color-quiet-deep);
   letter-spacing: 0.05em;
+}
+
+.photo__loading,
+.photo__empty {
+  margin: 2rem 0 4rem;
+  font-size: 0.875rem;
+  color: var(--color-dim);
+  letter-spacing: 0.08em;
+  text-align: center;
 }
 
 .photo__masonry {
@@ -549,7 +565,7 @@ watch(activeCategory, () => {
   }
 
   span:last-child {
-    color: #3d5070;
+    color: var(--color-quiet);
   }
 }
 
@@ -697,7 +713,7 @@ watch(activeCategory, () => {
 
 .lightbox__date {
   font-size: 0.65rem;
-  color: #2f3f56;
+  color: var(--color-quiet-deep);
   letter-spacing: 0.05em;
 }
 

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { categories as fallbackCategories, posts as fallbackPosts } from '../data/posts'
 import { fetchPosts } from '../api/posts'
@@ -11,9 +11,9 @@ import { useRouter } from '../router'
 const { push, paths } = useRouter()
 
 const activeCategory = ref('全部')
-const posts = ref<Post[]>(fallbackPosts)
-const categories = ref<string[]>(fallbackCategories)
-const loading = ref(false)
+const posts = ref<Post[]>([])
+const categories = ref<string[]>(['全部'])
+const loading = ref(true)
 
 const featuredPost = computed(() => posts.value.find((p) => p.featured) ?? posts.value[0])
 const gridPosts = computed(() =>
@@ -26,13 +26,12 @@ onMounted(async () => {
   loading.value = true
   try {
     const remote = await fetchPosts({ ordering: '-published_at' })
-    if (remote.length) {
-      posts.value = remote
-      const names = Array.from(new Set(remote.map((p) => p.category)))
-      categories.value = ['全部', ...names]
-    }
+    posts.value = remote
+    const names = Array.from(new Set(remote.map((p) => p.category)))
+    categories.value = ['全部', ...names]
   } catch {
-    /* 后端未启动时回退本地 mock */
+    posts.value = fallbackPosts
+    categories.value = fallbackCategories
   } finally {
     loading.value = false
   }
@@ -45,12 +44,19 @@ onMounted(async () => {
 
     <main class="home">
       <div class="home__featured-head">
-        <p class="font-body">✦ &nbsp; FEATURED</p>
-        <h2 class="font-display">精选文章</h2>
+        <p class="font-body">✦ &nbsp; 货架上的精选</p>
+        <h2 class="font-display">值得一读</h2>
       </div>
 
       <div class="home__featured">
-        <PostCard v-if="featuredPost" :post="featuredPost" featured @select="push(paths.article($event.id))" />
+        <p v-if="loading" class="home__status font-body">加载中…</p>
+        <PostCard
+          v-else-if="featuredPost"
+          :post="featuredPost"
+          featured
+          @select="push(paths.article($event.id))"
+        />
+        <p v-else class="home__status font-body">暂无精选文章</p>
       </div>
 
       <div class="divider-light home__divider" />
@@ -58,7 +64,7 @@ onMounted(async () => {
       <div class="home__layout">
         <div>
           <div class="home__toolbar">
-            <h2 class="font-display">近期文章</h2>
+            <h2 class="font-display">旅途手记</h2>
             <div class="home__filters">
               <button
                 v-for="cat in categories"
@@ -73,7 +79,8 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div v-if="gridPosts.length" class="home__grid">
+          <p v-if="loading" class="home__status font-body">加载中…</p>
+          <div v-else-if="gridPosts.length" class="home__grid">
             <PostCard v-for="post in gridPosts" :key="post.id" :post="post" @select="push(paths.article($event.id))" />
           </div>
           <div v-else class="home__empty">
@@ -92,7 +99,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <HomeSidebar />
+        <HomeSidebar :posts="posts" />
       </div>
     </main>
   </div>
@@ -172,6 +179,14 @@ onMounted(async () => {
   }
 }
 
+.home__status {
+  margin: 0;
+  padding: 2rem 0;
+  font-size: 0.875rem;
+  color: var(--color-dim);
+  letter-spacing: 0.08em;
+}
+
 .home__empty {
   display: flex;
   flex-direction: column;
@@ -182,7 +197,7 @@ onMounted(async () => {
 
   p {
     font-size: 0.875rem;
-    color: #3d5070;
+    color: var(--color-quiet);
     letter-spacing: 0.05em;
     margin: 0;
   }
