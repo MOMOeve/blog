@@ -336,6 +336,7 @@ watch(
               <button type="button" class="font-body" @click="insertSnippet('- 列表项')">列表</button>
               <button type="button" class="font-body" @click="insertSnippet('```\n代码\n```')">代码</button>
               <button type="button" class="font-body" @click="insertSnippet('> 引用')">引用</button>
+              <button type="button" class="font-body" @click="insertSnippet('---')">分割线</button>
               <input
                 ref="bodyImageInput"
                 type="file"
