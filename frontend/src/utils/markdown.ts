@@ -109,12 +109,20 @@ export function renderMarkdown(source: string): string {
 }
 
 function normalizeHrLine(line: string): string {
-  // 中文输入法常打出全角横线 / 破折号，统一成 ASCII 再判断分割线
-  return line.replace(/[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, '-')
+  // 中文输入法：全角横线 / 破折号 / 全角星号、下划线
+  return line
+    .replace(/[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, '-')
+    .replace(/\uFF0A/g, '*')
+    .replace(/\uFF3F/g, '_')
 }
 
 function isHorizontalRule(line: string): boolean {
-  return /^(-{3,}|\*{3,}|_{3,})\s*$/.test(normalizeHrLine(line).trim())
+  const t = normalizeHrLine(line).trim()
+  // ---  ***  ___
+  if (/^(-{3,}|\*{3,}|_{3,})\s*$/.test(t)) return true
+  // - - -  * * *  _ _ _
+  if (/^([-*_])(?: +\1){2,}\s*$/.test(t)) return true
+  return false
 }
 
 export function renderMarkdownDocument(source: string): MarkdownResult {
@@ -243,8 +251,9 @@ function inline(text: string): string {
   )
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
   s = s.replace(/__([^_]+)__/g, '<strong>$1</strong>')
-  s = s.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>')
-  s = s.replace(/(?<!_)_([^_]+)_(?!_)/g, '<em>$1</em>')
+  // 斜体：两侧需空白或边界，避免 snake_case / 路径被误伤
+  s = s.replace(/(^|[^*\w])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>')
+  s = s.replace(/(^|[^_\w])_([^_\n]+?)_(?!_)/g, '$1<em>$2</em>')
   return s
 }
 
