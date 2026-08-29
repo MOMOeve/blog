@@ -1,6 +1,7 @@
 /**
  * 轻量 Markdown → HTML（无外部依赖）
- * 支持：标题（含 TOC id）、粗斜体、代码块（语法高亮）、链接、引用、列表、图片
+ * 支持：标题（含 TOC id）、粗斜体、代码块（语法高亮）、链接、引用、列表、图片、表格、分割线
+ * 段落内单换行会渲染为 <br>（更符合中文写作习惯）
  */
 
 export interface MarkdownTocItem {
@@ -125,6 +126,71 @@ function isHorizontalRule(line: string): boolean {
   return false
 }
 
+function isTableSeparator(line: string): boolean {
+  const t = line.trim()
+  if (!t.includes('|')) return false
+  // | --- | :---: | ---: |
+  return /^\|?[\s:|-]+\|[\s:|-]*\|?$/.test(t) && /-+/.test(t)
+}
+
+function isTableRow(line: string): boolean {
+  const t = line.trim()
+  return t.includes('|') && !isTableSeparator(t) && t.replace(/\\\|/g, '').includes('|')
+}
+
+function splitTableCells(line: string): string[] {
+  let t = line.trim()
+  if (t.startsWith('|')) t = t.slice(1)
+  if (t.endsWith('|')) t = t.slice(0, -1)
+  return t.split('|').map((c) => c.trim())
+}
+
+function parseTable(lines: string[], start: number): { html: string; next: number } | null {
+  if (!isTableRow(lines[start] || '')) return null
+  if (!isTableSeparator(lines[start + 1] || '')) return null
+
+  const header = splitTableCells(lines[start])
+  const alignLine = splitTableCells(lines[start + 1])
+  const aligns = alignLine.map((cell) => {
+    const left = cell.startsWith(':')
+    const right = cell.endsWith(':')
+    if (left && right) return 'center'
+    if (right) return 'right'
+    if (left) return 'left'
+    return ''
+  })
+
+  const rows: string[][] = []
+  let i = start + 2
+  while (i < lines.length && isTableRow(lines[i])) {
+    rows.push(splitTableCells(lines[i]))
+    i += 1
+  }
+
+  const th = header
+    .map((cell, idx) => {
+      const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : ''
+      return `<th${align}>${inline(cell)}</th>`
+    })
+    .join('')
+  const body = rows
+    .map((row) => {
+      const tds = header
+        .map((_, idx) => {
+          const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : ''
+          return `<td${align}>${inline(row[idx] ?? '')}</td>`
+        })
+        .join('')
+      return `<tr>${tds}</tr>`
+    })
+    .join('')
+
+  return {
+    html: `<div class="md-table-wrap"><table><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>`,
+    next: i,
+  }
+}
+
 export function renderMarkdownDocument(source: string): MarkdownResult {
   const toc: MarkdownTocItem[] = []
   resetSlugCounts()
@@ -165,6 +231,13 @@ export function renderMarkdownDocument(source: string): MarkdownResult {
       continue
     }
 
+    const table = parseTable(lines, i)
+    if (table) {
+      out.push(table.html)
+      i = table.next
+      continue
+    }
+
     const heading = /^(#{1,4})\s+(.+)$/.exec(line)
     if (heading) {
       const level = heading[1].length
@@ -184,7 +257,7 @@ export function renderMarkdownDocument(source: string): MarkdownResult {
         quote.push(lines[i].replace(/^>\s?/, ''))
         i += 1
       }
-      out.push(`<blockquote><p>${inline(quote.join(' '))}</p></blockquote>`)
+      out.push(`<blockquote><p>${quote.map((l) => inline(l)).join('<br />')}</p></blockquote>`)
       continue
     }
 
@@ -214,11 +287,12 @@ export function renderMarkdownDocument(source: string): MarkdownResult {
     }
 
     const para: string[] = []
-    while (i < lines.length && lines[i].trim() && !isBlockStart(lines[i])) {
+    while (i < lines.length && lines[i].trim() && !isBlockStart(lines[i], lines[i + 1])) {
       para.push(lines[i])
       i += 1
     }
-    out.push(`<p>${inline(para.join(' '))}</p>`)
+    // 单次回车 → 换行；空一行才分段
+    out.push(`<p>${para.map((l) => inline(l)).join('<br />')}</p>`)
   }
 
   resetSlugCounts()
@@ -230,13 +304,14 @@ export function renderMarkdownDocument(source: string): MarkdownResult {
   }
 }
 
-function isBlockStart(line: string): boolean {
+function isBlockStart(line: string, nextLine = ''): boolean {
   return (
     /^#{1,4}\s+/.test(line) ||
     /^>\s?/.test(line) ||
     /^[-*+]\s+/.test(line) ||
     /^\d+\.\s+/.test(line) ||
     isHorizontalRule(line) ||
+    (isTableRow(line) && isTableSeparator(nextLine || '')) ||
     /^%%CODEBLOCK_/.test(line.trim())
   )
 }

@@ -260,7 +260,7 @@ watch(
       <div class="editor__top">
         <button type="button" class="editor__back font-body" @click="cancelEdit">← 返回</button>
         <h1 class="editor__title font-display">{{ pageTitle }}</h1>
-        <p class="editor__hint font-body">正文使用 Markdown（支持代码高亮、目录、粘贴/上传图片）</p>
+        <p class="editor__hint font-body">正文使用 Markdown（支持表格、代码高亮、目录、粘贴/上传图片；回车换行，空一行分段）</p>
       </div>
 
       <div v-if="!isAuthor" class="editor__warn font-body">
@@ -337,6 +337,13 @@ watch(
               <button type="button" class="font-body" @click="insertSnippet('```\n代码\n```')">代码</button>
               <button type="button" class="font-body" @click="insertSnippet('> 引用')">引用</button>
               <button type="button" class="font-body" @click="insertSnippet('---')">分割线</button>
+              <button
+                type="button"
+                class="font-body"
+                @click="insertSnippet('| 列1 | 列2 |\n| --- | --- |\n| 内容 | 内容 |')"
+              >
+                表格
+              </button>
               <input
                 ref="bodyImageInput"
                 type="file"
