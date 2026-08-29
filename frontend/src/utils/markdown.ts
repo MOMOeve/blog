@@ -142,7 +142,7 @@ export function renderMarkdownDocument(source: string): MarkdownResult {
       continue
     }
 
-    if (/^---+$/.test(line.trim()) || /^\*\*\*+$/.test(line.trim())) {
+    if (/^(-{3,}|\*{3,}|_{3,})\s*$/.test(line.trim())) {
       out.push('<hr />')
       i += 1
       continue
