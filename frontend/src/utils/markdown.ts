@@ -108,6 +108,15 @@ export function renderMarkdown(source: string): string {
   return renderMarkdownDocument(source).html
 }
 
+function normalizeHrLine(line: string): string {
+  // 中文输入法常打出全角横线 / 破折号，统一成 ASCII 再判断分割线
+  return line.replace(/[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, '-')
+}
+
+function isHorizontalRule(line: string): boolean {
+  return /^(-{3,}|\*{3,}|_{3,})\s*$/.test(normalizeHrLine(line).trim())
+}
+
 export function renderMarkdownDocument(source: string): MarkdownResult {
   const toc: MarkdownTocItem[] = []
   resetSlugCounts()
@@ -142,7 +151,7 @@ export function renderMarkdownDocument(source: string): MarkdownResult {
       continue
     }
 
-    if (/^(-{3,}|\*{3,}|_{3,})\s*$/.test(line.trim())) {
+    if (isHorizontalRule(line)) {
       out.push('<hr />')
       i += 1
       continue
@@ -219,8 +228,7 @@ function isBlockStart(line: string): boolean {
     /^>\s?/.test(line) ||
     /^[-*+]\s+/.test(line) ||
     /^\d+\.\s+/.test(line) ||
-    /^---+$/.test(line.trim()) ||
-    /^\*\*\*+$/.test(line.trim()) ||
+    isHorizontalRule(line) ||
     /^%%CODEBLOCK_/.test(line.trim())
   )
 }
