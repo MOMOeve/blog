@@ -68,16 +68,26 @@ class ProfileUpdateSerializer(serializers.Serializer):
         return instance
 
 
+def resolve_site_author():
+    """侧栏/关于页作者：排除演示账号，优先 author 角色与超级用户。"""
+    qs = (
+        User.objects.filter(is_staff=True, is_active=True)
+        .exclude(username__iexact='demo')
+        .exclude(email__iexact='demo@example.com')
+        .select_related('profile')
+    )
+    return (
+        qs.filter(profile__role='author').order_by('id').first()
+        or qs.filter(is_superuser=True).order_by('id').first()
+        or qs.order_by('id').first()
+    )
+
+
 def serialize_site_about() -> dict:
     from .models import SiteAbout
 
     about = SiteAbout.get_solo()
-    author = (
-        User.objects.filter(is_staff=True, is_active=True)
-        .order_by('id')
-        .select_related('profile')
-        .first()
-    )
+    author = resolve_site_author()
     display_name = ''
     avatar = ''
     profile_bio = ''

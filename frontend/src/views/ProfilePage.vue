@@ -114,9 +114,16 @@ async function onAvatarChange(e: Event) {
   if (!file) return
   avatarUploading.value = true
   error.value = ''
+  message.value = ''
   try {
     const result = await uploadAvatar(file)
     profileForm.avatar = result.path.startsWith('/') ? result.path : result.url
+    await saveProfile({
+      displayName: profileForm.displayName.trim(),
+      bio: profileForm.bio.trim(),
+      avatar: profileForm.avatar.trim(),
+    })
+    message.value = '头像已更新'
   } catch (err) {
     error.value = err instanceof Error ? err.message : '头像上传失败'
   } finally {
