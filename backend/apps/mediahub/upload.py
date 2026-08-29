@@ -63,13 +63,13 @@ class AvatarUploadView(APIView):
         folder = timezone.now().strftime('uploads/avatars/%Y/%m')
         filename = f'{uuid4().hex}{ext}'
         saved_path = default_storage.save(f'{folder}/{filename}', upload)
-        relative_url = f'{settings.MEDIA_URL.rstrip("/")}/{saved_path.lstrip("/")}'
+        relative_url = f'/{settings.MEDIA_URL.strip("/")}/{saved_path.lstrip("/")}'
         absolute_url = request.build_absolute_uri(relative_url)
 
         return Response(
             {
                 'url': absolute_url,
-                'path': relative_url if relative_url.startswith('/') else f'/{relative_url}',
+                'path': relative_url,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -107,13 +107,13 @@ class MediaUploadView(APIView):
         folder = timezone.now().strftime('uploads/%Y/%m')
         filename = f'{uuid4().hex}{ext}'
         saved_path = default_storage.save(f'{folder}/{filename}', upload)
-        relative_url = f'{settings.MEDIA_URL.rstrip("/")}/{saved_path.lstrip("/")}'
+        relative_url = f'/{settings.MEDIA_URL.strip("/")}/{saved_path.lstrip("/")}'
         absolute_url = request.build_absolute_uri(relative_url)
 
         return Response(
             {
                 'url': absolute_url,
-                'path': relative_url if relative_url.startswith('/') else f'/{relative_url}',
+                'path': relative_url,
                 'name': upload.name,
                 'size': upload.size,
             },

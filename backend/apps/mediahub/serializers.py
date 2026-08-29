@@ -23,11 +23,17 @@ class PhotoSerializer(serializers.ModelSerializer):
         ]
 
     def get_img(self, obj: Photo) -> str:
-        url = obj.image_url
-        request = self.context.get('request')
-        if request and url.startswith('/'):
-            return request.build_absolute_uri(url)
-        return url
+        url = (obj.image_url or '').strip()
+        if not url:
+            return ''
+        if url.startswith(('http://', 'https://')):
+            from urllib.parse import urlparse
+
+            path = urlparse(url).path or ''
+            if path.startswith('/media/'):
+                return path
+            return url
+        return url if url.startswith('/') else f'/{url}'
 
 
 class PhotoWriteSerializer(serializers.ModelSerializer):

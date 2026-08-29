@@ -212,7 +212,8 @@ async function onCoverSelected(event: Event) {
   error.value = ''
   try {
     const result = await uploadImage(file)
-    img.value = result.path || result.url
+    const path = result.path?.startsWith('/') ? result.path : result.url
+    img.value = path.startsWith('http') ? new URL(path).pathname : path
   } catch (e) {
     error.value = e instanceof Error ? e.message : '封面上传失败'
   } finally {

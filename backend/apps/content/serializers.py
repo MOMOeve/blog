@@ -50,11 +50,18 @@ class PostListSerializer(serializers.ModelSerializer):
         return f'{dt.year}年{dt.month}月{dt.day}日'
 
     def get_img(self, obj: Post) -> str:
-        url = obj.cover_image or ''
-        request = self.context.get('request')
-        if request and url.startswith('/'):
-            return request.build_absolute_uri(url)
-        return url
+        """返回相对路径，避免反向代理下绝对 URL 端口/域名错误导致封面裂图。"""
+        url = (obj.cover_image or '').strip()
+        if not url:
+            return ''
+        if url.startswith(('http://', 'https://')):
+            from urllib.parse import urlparse
+
+            path = urlparse(url).path or ''
+            if path.startswith('/media/'):
+                return path
+            return url
+        return url if url.startswith('/') else f'/{url}'
 
 
 class PostDetailSerializer(PostListSerializer):
