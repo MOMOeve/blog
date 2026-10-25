@@ -1,0 +1,10 @@
+{
+  "name": "星野文记",
+  "short_name": "星野文记",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1b0d0f",
+  "theme_color": "#1b0d0f",
+  "lang": "zh-CN",
+  "icons": [{ "src": "/img/log.png", "sizes": "192x192", "type": "image/png" }]
+}

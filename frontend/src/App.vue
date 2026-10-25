@@ -1,0 +1,86 @@
+<script setup lang="ts">
+import { onMounted, watch } from 'vue'
+import AppNav from './components/AppNav.vue'
+import AppFooter from './components/AppFooter.vue'
+import LoginModal from './components/LoginModal.vue'
+import HomePage from './views/HomePage.vue'
+import ArticlesPage from './views/ArticlesPage.vue'
+import ArticleDetailPage from './views/ArticleDetailPage.vue'
+import ArticleEditorPage from './views/ArticleEditorPage.vue'
+import DraftsPage from './views/DraftsPage.vue'
+import PhotographyPage from './views/PhotographyPage.vue'
+import AboutPage from './views/AboutPage.vue'
+import ContactPage from './views/ContactPage.vue'
+import ProfilePage from './views/ProfilePage.vue'
+import FavoritesPage from './views/FavoritesPage.vue'
+import ResetPasswordPage from './views/ResetPasswordPage.vue'
+import { useTheme } from './composables/useTheme'
+import { useAuth } from './composables/useAuth'
+import { useRouter, type RouteName } from './router'
+import { SITE_NAME } from './data/site'
+import { updatePageSeo } from './utils/seo'
+
+useTheme()
+const { hydrateFromServer } = useAuth()
+const { route } = useRouter()
+
+const TITLE_MAP: Record<RouteName, string> = {
+  home: SITE_NAME,
+  articles: `文章 · ${SITE_NAME}`,
+  'article-detail': `文章 · ${SITE_NAME}`,
+  'article-write': `写文章 · ${SITE_NAME}`,
+  'article-edit': `编辑文章 · ${SITE_NAME}`,
+  drafts: `草稿箱 · ${SITE_NAME}`,
+  photography: `摄影 · ${SITE_NAME}`,
+  about: `关于 · ${SITE_NAME}`,
+  contact: `联系 · ${SITE_NAME}`,
+  profile: `个人资料 · ${SITE_NAME}`,
+  favorites: `我的收藏 · ${SITE_NAME}`,
+  'reset-password': `重置密码 · ${SITE_NAME}`,
+}
+
+watch(
+  () => route.value.name,
+  (name) => {
+    updatePageSeo({
+      title: TITLE_MAP[name] || SITE_NAME,
+      description: '星野文记：记录代码、语言、旅行与慢慢生活。',
+      url: window.location.href,
+    })
+  },
+  { immediate: true },
+)
+
+onMounted(() => {
+  void hydrateFromServer()
+})
+</script>
+
+<template>
+  <div class="app">
+    <AppNav />
+
+    <HomePage v-if="route.name === 'home'" />
+    <ArticlesPage v-else-if="route.name === 'articles'" />
+    <ArticleDetailPage v-else-if="route.name === 'article-detail'" />
+    <ArticleEditorPage v-else-if="route.name === 'article-write' || route.name === 'article-edit'" />
+    <DraftsPage v-else-if="route.name === 'drafts'" />
+    <PhotographyPage v-else-if="route.name === 'photography'" />
+    <AboutPage v-else-if="route.name === 'about'" />
+    <ContactPage v-else-if="route.name === 'contact'" />
+    <ProfilePage v-else-if="route.name === 'profile'" />
+    <FavoritesPage v-else-if="route.name === 'favorites'" />
+    <ResetPasswordPage v-else-if="route.name === 'reset-password'" />
+
+    <AppFooter />
+    <LoginModal />
+  </div>
+</template>
+
+<style scoped lang="less">
+.app {
+  min-height: 100%;
+  background: var(--color-bg);
+  transition: background-color 0.35s ease;
+}
+</style>
