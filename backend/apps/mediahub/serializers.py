@@ -23,11 +23,8 @@ class PhotoSerializer(serializers.ModelSerializer):
         ]
 
     def get_img(self, obj: Photo) -> str:
-        url = obj.image_url
-        request = self.context.get('request')
-        if request and url.startswith('/'):
-            return request.build_absolute_uri(url)
-        return url
+        # 返回相对路径，避免反向代理或公网部署时把图片地址拼成 localhost。
+        return obj.image_url
 
 
 class PhotoWriteSerializer(serializers.ModelSerializer):

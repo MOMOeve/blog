@@ -51,11 +51,8 @@ class PostListSerializer(serializers.ModelSerializer):
         return f'{dt.year}年{dt.month}月{dt.day}日'
 
     def get_img(self, obj: Post) -> str:
-        url = obj.cover_image or ''
-        request = self.context.get('request')
-        if request and url.startswith('/'):
-            return request.build_absolute_uri(url)
-        return url
+        # 返回相对路径，确保浏览器从当前站点加载媒体文件。
+        return obj.cover_image or ''
 
 
 class PostDetailSerializer(PostListSerializer):
