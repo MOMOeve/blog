@@ -395,6 +395,7 @@ watch(bodyHtml, applyArticleEnhancements)
   height: 3px;
   background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
   transition: width 0.12s ease-out;
+  animation: progressGlow 2.4s ease-in-out infinite;
 }
 
 .detail__toolbar {

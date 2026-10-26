@@ -15,6 +15,11 @@ body,
   padding: 0;
 }
 
+#app {
+  position: relative;
+  z-index: 1;
+}
+
 body {
   background-color: var(--color-bg);
   background-image:
@@ -30,6 +35,19 @@ body {
   transition:
     background-color 0.35s ease,
     color 0.35s ease;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(217, 188, 166, 0.018) 4px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 5px, rgba(116, 48, 49, 0.015) 6px);
+  mix-blend-mode: soft-light;
 }
 
 ::selection {
@@ -144,6 +162,11 @@ img {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes progressGlow {
+  0%, 100% { box-shadow: 0 0 8px color-mix(in srgb, var(--color-secondary) 35%, transparent); }
+  50% { box-shadow: 0 0 18px color-mix(in srgb, var(--color-secondary) 65%, transparent); }
+}
+
 .font-display {
   font-family: var(--font-display);
 }
@@ -214,6 +237,36 @@ img {
 .card-hover:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-card), 0 12px 28px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.card-hover,
+.grid-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.card-hover::before,
+.grid-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background: linear-gradient(115deg, transparent 20%, color-mix(in srgb, var(--color-secondary) 16%, transparent) 48%, transparent 72%);
+  transform: translateX(-120%);
+  transition: opacity 0.25s ease;
+}
+
+.card-hover:hover::before,
+.grid-card:hover::before {
+  opacity: 1;
+  animation: cardSheen 0.9s ease-out both;
+}
+
+@keyframes cardSheen {
+  to { transform: translateX(120%); }
 }
 
 .page-transition-enter-active,
