@@ -737,18 +737,23 @@ select {
   }
 
   &:hover {
-    border-color: color-mix(in srgb, var(--color-secondary) 38%, var(--color-border));
+    border-color: color-mix(in srgb, var(--color-secondary) 18%, var(--color-border));
     transform: translateY(-2px);
-    box-shadow: var(--shadow-card), 0 0 1rem color-mix(in srgb, var(--color-primary) 7%, transparent);
+    box-shadow: var(--shadow-card), 0 0 0.75rem color-mix(in srgb, var(--color-primary) 4%, transparent);
 
     h3 {
-      color: var(--color-secondary);
+      color: var(--color-soft);
     }
 
     img {
-      opacity: 0.9;
-      transform: scale(1.04);
+      opacity: 0.82;
+      transform: scale(1.02);
     }
+  }
+
+  &:focus-visible {
+    outline: 1px solid color-mix(in srgb, var(--color-secondary) 42%, transparent);
+    outline-offset: 0.3rem;
   }
 }
 

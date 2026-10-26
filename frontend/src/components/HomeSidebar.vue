@@ -188,6 +188,7 @@ onMounted(async () => {
   display: flex;
   gap: 0.75rem;
   cursor: pointer;
+  transition: transform 0.28s ease;
 
   .thumb {
     width: 3.5rem;
@@ -199,7 +200,7 @@ onMounted(async () => {
     :deep(.media-cover__img),
     :deep(.media-cover__ph) {
       opacity: 0.75;
-      transition: opacity 0.2s;
+      transition: opacity 0.35s ease, transform 0.45s ease;
     }
 
     :deep(.media-cover__ph) {
@@ -233,13 +234,21 @@ onMounted(async () => {
   }
 
   &:hover {
+    transform: translateX(2px);
+
     img {
-      opacity: 0.9;
+      opacity: 0.84;
+      transform: scale(1.015);
     }
 
     p {
-      color: var(--color-primary);
+      color: var(--color-soft);
     }
+  }
+
+  &:focus-visible {
+    outline: 1px solid color-mix(in srgb, var(--color-secondary) 42%, transparent);
+    outline-offset: 0.3rem;
   }
 }
 
