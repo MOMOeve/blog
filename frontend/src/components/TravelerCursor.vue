@@ -5,6 +5,8 @@ const x = ref(-80)
 const y = ref(-80)
 const visible = ref(false)
 const active = ref(false)
+const artworkReady = ref(false)
+const artworkSrc = '/img/cursor-character.png'
 
 function move(event: MouseEvent) {
   x.value = event.clientX
@@ -19,6 +21,9 @@ function leave() {
 }
 
 onMounted(() => {
+  const artwork = new Image()
+  artwork.onload = () => { artworkReady.value = true }
+  artwork.src = artworkSrc
   window.addEventListener('mousemove', move, { passive: true })
   document.documentElement.addEventListener('mouseleave', leave)
 })
@@ -37,6 +42,7 @@ onBeforeUnmount(() => {
     aria-hidden="true"
   >
     <span class="traveler-cursor__halo" />
+    <img v-if="artworkReady" class="traveler-cursor__artwork" :src="artworkSrc" alt="" />
     <span class="traveler-cursor__figure">
       <span class="traveler-cursor__ear traveler-cursor__ear--left" />
       <span class="traveler-cursor__ear traveler-cursor__ear--right" />
@@ -84,6 +90,19 @@ onBeforeUnmount(() => {
   transform: rotate(-8deg);
   transition: transform 0.25s ease;
 }
+
+.traveler-cursor__artwork {
+  position: absolute;
+  top: 0.1rem;
+  left: 0.1rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+  transform: translate(-0.12rem, -0.12rem);
+  filter: drop-shadow(0 0.18rem 0.25rem rgba(30, 12, 14, 0.32));
+}
+
+.traveler-cursor:has(.traveler-cursor__artwork) .traveler-cursor__figure { display: none; }
 
 .traveler-cursor__ear {
   position: absolute;
