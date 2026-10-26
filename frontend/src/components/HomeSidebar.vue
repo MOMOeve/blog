@@ -39,6 +39,7 @@ onMounted(async () => {
           seed="avatar"
         />
       </div>
+      <img class="sidebar__traveler" src="/img/traveler-sit.png" alt="坐在旅途旁的小旅人" />
       <h4 class="font-display">{{ author.displayName || '作者' }}</h4>
       <div class="divider-light" />
       <p v-if="author.bio" class="sidebar__bio font-body">{{ author.bio }}</p>
@@ -86,6 +87,8 @@ onMounted(async () => {
 }
 
 .sidebar__profile {
+  position: relative;
+  overflow: visible;
   padding: 1.5rem;
   border: 1px solid var(--color-border);
   background: linear-gradient(145deg, var(--color-card), var(--color-muted));
@@ -109,6 +112,25 @@ onMounted(async () => {
   .divider-light {
     margin-bottom: 1.25rem;
   }
+}
+
+.sidebar__traveler {
+  position: absolute;
+  right: 0.35rem;
+  bottom: -0.75rem;
+  width: 5.4rem;
+  height: 5rem;
+  object-fit: contain;
+  object-position: center;
+  opacity: 0.82;
+  pointer-events: none;
+  filter: drop-shadow(0 0.3rem 0.35rem rgba(30, 12, 14, 0.26));
+  animation: travelerFloat 3.8s ease-in-out infinite;
+}
+
+@keyframes travelerFloat {
+  0%, 100% { transform: translateY(0) rotate(1deg); }
+  50% { transform: translateY(-0.24rem) rotate(-1deg); }
 }
 
 .sidebar__avatar {
