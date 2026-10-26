@@ -76,13 +76,35 @@ function truncate(text: string, len: number) {
   border: 1px solid var(--color-border);
   background: linear-gradient(135deg, var(--color-card), var(--color-card-elevated));
   box-shadow: var(--shadow-card);
-  transition: border-color 0.5s;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid transparent;
+    background: linear-gradient(110deg, transparent 25%, rgba(217, 188, 166, 0.16) 50%, transparent 75%) border-box;
+    mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transform: translateX(-80%);
+  }
 
   &:hover {
-    border-color: rgba(126, 184, 247, 0.2);
+    border-color: color-mix(in srgb, var(--color-secondary) 52%, var(--color-border));
+    box-shadow: var(--shadow-card), 0 0 2.5rem color-mix(in srgb, var(--color-primary) 18%, transparent);
+    transform: translateY(-4px);
+
+    &::after {
+      opacity: 1;
+      animation: cardSheen 0.9s ease-out both;
+    }
 
     h2 {
-      color: var(--color-primary);
+      color: var(--color-secondary);
     }
 
     img,
@@ -124,6 +146,11 @@ function truncate(text: string, len: number) {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: background 0.35s ease;
+
+  .featured:hover & { background: linear-gradient(135deg, transparent, color-mix(in srgb, var(--color-primary) 12%, transparent)); }
 
   @media (min-width: 768px) {
     padding: 3rem;
@@ -218,13 +245,15 @@ function truncate(text: string, len: number) {
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  transition: border-color 0.5s;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
 
   &:hover {
-    border-color: rgba(126, 184, 247, 0.18);
+    border-color: color-mix(in srgb, var(--color-secondary) 46%, var(--color-border));
+    box-shadow: var(--shadow-card), 0 0 1.8rem color-mix(in srgb, var(--color-primary) 14%, transparent);
+    transform: translateY(-4px);
 
     h3 {
-      color: var(--color-primary);
+      color: var(--color-secondary);
     }
 
     :deep(.media-cover__img),
