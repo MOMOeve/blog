@@ -333,7 +333,7 @@ function goToPage(page: number) {
         <span v-if="activeYear"> · {{ activeYear }}年{{ activeMonth }}月</span>
       </p>
 
-      <p v-if="loading" class="articles__loading font-body">加载中…</p>
+      <p v-if="loading" class="articles__loading soft-loading font-body">加载中…</p>
 
       <div v-else-if="!filtered.length" class="articles__empty">
         <p class="font-display">未找到相关文章</p>
@@ -710,6 +710,15 @@ select {
   @media (min-width: 1024px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
+
+  .grid-card {
+    animation: pageIn 0.45s ease both;
+  }
+
+  .grid-card:nth-child(2) { animation-delay: 0.04s; }
+  .grid-card:nth-child(3) { animation-delay: 0.08s; }
+  .grid-card:nth-child(4) { animation-delay: 0.12s; }
+  .grid-card:nth-child(5) { animation-delay: 0.16s; }
 }
 
 .grid-card {
@@ -718,10 +727,15 @@ select {
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: border-color 0.5s;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--color-primary) 7%, transparent);
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 
   &:hover {
     border-color: rgba(126, 184, 247, 0.22);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-card);
 
     h3 {
       color: var(--color-primary);

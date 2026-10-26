@@ -252,6 +252,7 @@ function onSearchKeydown(e: KeyboardEvent) {
   border-bottom: 1px solid var(--color-border);
   background: var(--color-nav-bg);
   box-shadow: var(--shadow-nav);
+  transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
 .nav__inner {
@@ -268,6 +269,9 @@ function onSearchKeydown(e: KeyboardEvent) {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  transition: transform 0.25s ease;
+
+  &:hover { transform: translateY(-1px); }
 }
 
 .nav__brand {
@@ -325,13 +329,14 @@ function onSearchKeydown(e: KeyboardEvent) {
 
 .nav__icon-btn {
   color: var(--color-muted-fg);
-  transition: color 0.2s;
+  transition: color 0.2s, transform 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
   &:hover {
     color: var(--color-fg);
+    transform: translateY(-1px);
   }
 }
 
@@ -399,6 +404,7 @@ function onSearchKeydown(e: KeyboardEvent) {
   display: block;
   border-top: 1px solid var(--color-border);
   background: var(--color-nav-mobile-bg);
+  animation: pageIn 0.22s ease both;
 
   @media (min-width: 768px) {
     display: none;
@@ -437,6 +443,7 @@ function onSearchKeydown(e: KeyboardEvent) {
   align-items: flex-start;
   justify-content: center;
   padding: 6rem 1.5rem 1.5rem;
+  animation: pageIn 0.22s ease both;
 }
 
 .nav__search-panel {
@@ -445,6 +452,8 @@ function onSearchKeydown(e: KeyboardEvent) {
   padding: 1.5rem;
   border: 1px solid rgba(126, 184, 247, 0.18);
   background: var(--color-nav-mobile-bg);
+  box-shadow: var(--shadow-modal);
+  border-radius: 6px;
 }
 
 .nav__search-label {

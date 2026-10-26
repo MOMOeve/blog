@@ -60,17 +60,21 @@ onMounted(() => {
   <div class="app">
     <AppNav />
 
-    <HomePage v-if="route.name === 'home'" />
-    <ArticlesPage v-else-if="route.name === 'articles'" />
-    <ArticleDetailPage v-else-if="route.name === 'article-detail'" />
-    <ArticleEditorPage v-else-if="route.name === 'article-write' || route.name === 'article-edit'" />
-    <DraftsPage v-else-if="route.name === 'drafts'" />
-    <PhotographyPage v-else-if="route.name === 'photography'" />
-    <AboutPage v-else-if="route.name === 'about'" />
-    <ContactPage v-else-if="route.name === 'contact'" />
-    <ProfilePage v-else-if="route.name === 'profile'" />
-    <FavoritesPage v-else-if="route.name === 'favorites'" />
-    <ResetPasswordPage v-else-if="route.name === 'reset-password'" />
+    <Transition name="page-transition" mode="out-in">
+      <div :key="route.name">
+        <HomePage v-if="route.name === 'home'" />
+        <ArticlesPage v-else-if="route.name === 'articles'" />
+        <ArticleDetailPage v-else-if="route.name === 'article-detail'" />
+        <ArticleEditorPage v-else-if="route.name === 'article-write' || route.name === 'article-edit'" />
+        <DraftsPage v-else-if="route.name === 'drafts'" />
+        <PhotographyPage v-else-if="route.name === 'photography'" />
+        <AboutPage v-else-if="route.name === 'about'" />
+        <ContactPage v-else-if="route.name === 'contact'" />
+        <ProfilePage v-else-if="route.name === 'profile'" />
+        <FavoritesPage v-else-if="route.name === 'favorites'" />
+        <ResetPasswordPage v-else-if="route.name === 'reset-password'" />
+      </div>
+    </Transition>
 
     <AppFooter />
     <LoginModal />

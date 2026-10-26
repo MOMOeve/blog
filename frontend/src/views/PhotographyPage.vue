@@ -248,7 +248,7 @@ watch(activeCategory, () => {
         <span class="photo__count font-body">{{ loading ? '加载中…' : `${filtered.length} 张照片` }}</span>
       </div>
 
-      <p v-if="loading" class="photo__loading font-body">加载中…</p>
+      <p v-if="loading" class="photo__loading soft-loading font-body">加载中…</p>
       <p v-else-if="!filtered.length" class="photo__empty font-body">暂无照片</p>
       <div v-else class="photo__masonry">
         <div

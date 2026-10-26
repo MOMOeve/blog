@@ -79,7 +79,7 @@ onMounted(async () => {
             </div>
           </div>
 
-          <p v-if="loading" class="home__status font-body">加载中…</p>
+          <p v-if="loading" class="home__status soft-loading font-body">加载中…</p>
           <div v-else-if="gridPosts.length" class="home__grid">
           <PostCard v-for="post in gridPosts" :key="post.id" :post="post" @select="push(paths.article($event.slug || $event.id))" />
           </div>

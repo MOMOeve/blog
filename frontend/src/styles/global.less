@@ -32,6 +32,16 @@ body {
     color 0.35s ease;
 }
 
+::selection {
+  color: var(--color-fg);
+  background: color-mix(in srgb, var(--color-primary) 72%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-secondary) 75%, transparent);
+  outline-offset: 3px;
+}
+
 html {
   font-size: 17px;
   transition: color-scheme 0.35s ease;
@@ -124,6 +134,16 @@ img {
   }
 }
 
+@keyframes softPulse {
+  0%, 100% { opacity: 0.58; }
+  50% { opacity: 1; }
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .font-display {
   font-family: var(--font-display);
 }
@@ -192,8 +212,32 @@ img {
 }
 
 .card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card), 0 0 0 1px var(--color-border);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-card), 0 12px 28px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.page-transition-enter-active,
+.page-transition-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.page-transition-enter-from,
+.page-transition-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.soft-loading {
+  animation: softPulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .img-overlay {
@@ -253,6 +297,22 @@ img {
   min-height: 100vh;
   padding-top: 6rem;
   padding-bottom: 6rem;
+}
+
+@media (max-width: 767px) {
+  .page-shell {
+    padding-top: 5rem;
+    padding-bottom: 4rem;
+  }
+
+  .page-header__inner {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .container {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
 }
 
 .page-header {
@@ -338,12 +398,13 @@ img {
   border: 1px solid var(--color-border);
   background: transparent;
   color: var(--color-muted-fg);
-  transition: all 0.2s;
+  transition: color 0.22s ease, border-color 0.22s ease, background 0.22s ease, transform 0.22s ease;
 
   &:hover {
     border-color: var(--color-border-strong);
     color: var(--color-fg);
     background: var(--color-surface-deep);
+    transform: translateY(-1px);
   }
 
   &.is-active {
@@ -351,6 +412,8 @@ img {
     border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
     color: var(--color-primary);
   }
+
+  &:active { transform: translateY(0); }
 }
 
 /* Markdown 正文（详情页 / 编辑预览） */
