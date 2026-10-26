@@ -14,6 +14,7 @@ import ContactPage from './views/ContactPage.vue'
 import ProfilePage from './views/ProfilePage.vue'
 import FavoritesPage from './views/FavoritesPage.vue'
 import ResetPasswordPage from './views/ResetPasswordPage.vue'
+import TravelerCursor from './components/TravelerCursor.vue'
 import { useTheme } from './composables/useTheme'
 import { useAuth } from './composables/useAuth'
 import { useRouter, type RouteName } from './router'
@@ -58,6 +59,7 @@ onMounted(() => {
 
 <template>
   <div class="app">
+    <TravelerCursor />
     <AppNav />
 
     <Transition name="page-transition" mode="out-in">

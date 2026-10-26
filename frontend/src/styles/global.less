@@ -20,6 +20,15 @@ body,
   z-index: 1;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  body:has(.traveler-cursor) { cursor: none; }
+  body:has(.traveler-cursor) button,
+  body:has(.traveler-cursor) a,
+  body:has(.traveler-cursor) input,
+  body:has(.traveler-cursor) textarea,
+  body:has(.traveler-cursor) select { cursor: none; }
+}
+
 body {
   background-color: var(--color-bg);
   background-image:
