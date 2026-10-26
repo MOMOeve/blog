@@ -216,7 +216,7 @@ onMounted(async () => {
     margin: 0;
     font-size: 0.75rem;
     line-height: 1.4;
-    color: var(--color-soft);
+    color: color-mix(in srgb, var(--color-soft) 90%, var(--color-fg));
     letter-spacing: 0.03em;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -227,7 +227,7 @@ onMounted(async () => {
   span {
     display: block;
     font-size: 0.65rem;
-    color: var(--color-quiet);
+    color: var(--color-muted-fg);
     margin-top: 0.25rem;
     letter-spacing: 0.05em;
   }

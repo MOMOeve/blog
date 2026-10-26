@@ -757,7 +757,7 @@ select {
   :deep(.media-cover__img),
   :deep(.media-cover__ph) {
     opacity: 0.75;
-    filter: saturate(0.8) sepia(0.08) brightness(0.82);
+    filter: saturate(0.56) sepia(0.12) brightness(0.72);
     transition: all 0.7s;
   }
 
@@ -807,7 +807,7 @@ select {
 
   .excerpt {
     font-size: 0.75rem;
-    color: var(--color-dim);
+    color: color-mix(in srgb, var(--color-muted-fg) 88%, var(--color-fg));
     line-height: 1.8;
     font-weight: 300;
     flex: 1;

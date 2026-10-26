@@ -136,7 +136,7 @@ function truncate(text: string, len: number) {
   :deep(.media-cover__img),
   :deep(.media-cover__ph) {
     opacity: 0.88;
-    filter: saturate(0.8) sepia(0.08) brightness(0.82);
+    filter: saturate(0.56) sepia(0.12) brightness(0.72);
     transition: all 0.7s;
   }
 }
@@ -188,7 +188,7 @@ function truncate(text: string, len: number) {
 
 .featured__excerpt {
   font-size: 0.875rem;
-  color: var(--color-muted-fg);
+  color: color-mix(in srgb, var(--color-muted-fg) 88%, var(--color-fg));
   line-height: 1.8;
   font-weight: 300;
   margin: 0 0 1.75rem;
@@ -272,7 +272,7 @@ function truncate(text: string, len: number) {
   :deep(.media-cover__img),
   :deep(.media-cover__ph) {
     opacity: 0.85;
-    filter: saturate(0.8) sepia(0.08) brightness(0.82);
+    filter: saturate(0.56) sepia(0.12) brightness(0.72);
     transition: all 0.7s;
   }
 }
