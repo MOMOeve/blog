@@ -1,6 +1,6 @@
 /**
  * 轻量 Markdown → HTML（无外部依赖）
- * 支持：标题（含 TOC id）、粗斜体、代码块（语法高亮）、链接、引用、列表、图片
+ * 支持：标题（含 TOC id）、粗斜体、代码块（语法高亮）、链接、引用、列表、任务列表、表格、图片
  */
 
 export interface MarkdownTocItem {
@@ -156,8 +156,15 @@ export function renderMarkdownDocument(source: string): MarkdownResult {
       if (level >= 2 && level <= 3) {
         toc.push({ level, text: textContent, id })
       }
-      out.push(`<h${level} id="${id}">${inline(textContent)}</h${level}>`)
+      out.push(`<h${level} id="${id}" data-heading="${escapeHtml(textContent)}">${inline(textContent)}</h${level}>`)
       i += 1
+      continue
+    }
+
+    const table = parseTable(lines, i)
+    if (table) {
+      out.push(table.html)
+      i = table.next
       continue
     }
 
@@ -174,7 +181,14 @@ export function renderMarkdownDocument(source: string): MarkdownResult {
     if (/^[-*+]\s+/.test(line)) {
       const items: string[] = []
       while (i < lines.length && /^[-*+]\s+/.test(lines[i])) {
-        items.push(`<li>${inline(lines[i].replace(/^[-*+]\s+/, ''))}</li>`)
+        const content = lines[i].replace(/^[-*+]\s+/, '')
+        const task = /^\[([ xX])\]\s+(.+)$/.exec(content)
+        if (task) {
+          const checked = task[1].toLowerCase() === 'x' ? ' checked' : ''
+          items.push(`<li class="md-task"><input type="checkbox" disabled${checked} /><span>${inline(task[2])}</span></li>`)
+        } else {
+          items.push(`<li>${inline(content)}</li>`)
+        }
         i += 1
       }
       out.push(`<ul>${items.join('')}</ul>`)
@@ -221,8 +235,38 @@ function isBlockStart(line: string): boolean {
     /^\d+\.\s+/.test(line) ||
     /^---+$/.test(line.trim()) ||
     /^\*\*\*+$/.test(line.trim()) ||
+    /^\|.*\|\s*$/.test(line.trim()) ||
     /^%%CODEBLOCK_/.test(line.trim())
   )
+}
+
+function parseTable(lines: string[], start: number): { html: string; next: number } | null {
+  if (start + 1 >= lines.length || !/^\|?.+\|.+\|?$/.test(lines[start].trim())) return null
+  if (!/^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(lines[start + 1].trim())) return null
+
+  const split = (line: string) => {
+    const value = line.trim().replace(/^\|/, '').replace(/\|$/, '')
+    return value.split('|').map((cell) => cell.trim())
+  }
+  const heads = split(lines[start])
+  const alignments = split(lines[start + 1]).map((cell) => {
+    const left = cell.startsWith(':')
+    const right = cell.endsWith(':')
+    return left && right ? 'center' : right ? 'right' : left ? 'left' : ''
+  })
+  const rows: string[][] = []
+  let next = start + 2
+  while (next < lines.length && /^\|?.+\|.+\|?$/.test(lines[next].trim()) && lines[next].trim()) {
+    rows.push(split(lines[next]))
+    next += 1
+  }
+  const cell = (tag: string, value: string, index: number) => {
+    const align = alignments[index]
+    const attr = align ? ` style="text-align:${align}"` : ''
+    return `<${tag}${attr}>${inline(value)}</${tag}>`
+  }
+  const html = `<div class="md-table-wrap"><table><thead><tr>${heads.map((value, index) => cell('th', value, index)).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${heads.map((_value, index) => cell('td', row[index] || '', index)).join('')}</tr>`).join('')}</tbody></table></div>`
+  return { html, next }
 }
 
 function inline(text: string): string {

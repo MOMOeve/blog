@@ -63,6 +63,25 @@ function applyArticleEnhancements() {
       })
       pre.appendChild(button)
     })
+
+    document.querySelectorAll<HTMLElement>('.detail__body h2[id], .detail__body h3[id]').forEach((heading) => {
+      if (heading.querySelector('.md-heading-copy')) return
+      const button = document.createElement('button')
+      button.className = 'md-heading-copy'
+      button.type = 'button'
+      button.setAttribute('aria-label', '复制标题链接')
+      button.textContent = '⌘'
+      button.addEventListener('click', async (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        const url = `${window.location.href.split('#')[0]}#${heading.id}`
+        window.history.replaceState({}, '', url)
+        await navigator.clipboard?.writeText(url)
+        button.textContent = '✓'
+        window.setTimeout(() => (button.textContent = '⌘'), 1200)
+      })
+      heading.appendChild(button)
+    })
   })
 }
 
