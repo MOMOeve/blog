@@ -27,6 +27,7 @@ Thumbs.db
 
 # Logs
 *.log
+blog-update*.zip
 npm-debug.log*
 
 # Local backups
