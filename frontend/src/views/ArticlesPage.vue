@@ -732,10 +732,14 @@ select {
   box-shadow: 0 10px 28px color-mix(in srgb, var(--color-primary) 7%, transparent);
   transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 
+  &::before {
+    display: none;
+  }
+
   &:hover {
     border-color: color-mix(in srgb, var(--color-secondary) 38%, var(--color-border));
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card), 0 0 1rem color-mix(in srgb, var(--color-primary) 7%, transparent);
 
     h3 {
       color: var(--color-secondary);

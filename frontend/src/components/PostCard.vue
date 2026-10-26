@@ -247,13 +247,17 @@ function truncate(text: string, len: number) {
   flex-direction: column;
   transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
 
+  &::before {
+    display: none;
+  }
+
   &:hover {
-    border-color: color-mix(in srgb, var(--color-secondary) 46%, var(--color-border));
-    box-shadow: var(--shadow-card), 0 0 1.8rem color-mix(in srgb, var(--color-primary) 14%, transparent);
-    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--color-secondary) 28%, var(--color-border));
+    box-shadow: var(--shadow-card), 0 0 1rem color-mix(in srgb, var(--color-primary) 7%, transparent);
+    transform: translateY(-2px);
 
     h3 {
-      color: var(--color-secondary);
+      color: var(--color-soft);
     }
 
     :deep(.media-cover__img),
