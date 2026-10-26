@@ -97,6 +97,8 @@ onBeforeUnmount(() => {
   left: 0.1rem;
   width: 2.25rem;
   height: 2.25rem;
+  max-width: none;
+  display: block;
   object-fit: contain;
   transform: translate(-0.12rem, -0.12rem);
   filter: drop-shadow(0 0.18rem 0.25rem rgba(30, 12, 14, 0.32));
