@@ -69,7 +69,7 @@ onMounted(() => {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   if (!reduced && !sessionStorage.getItem('hoshino-intro-seen')) {
     showIntro.value = true
-    introTimer = window.setTimeout(closeIntro, 4200)
+    introTimer = window.setTimeout(closeIntro, 7200)
     window.addEventListener('keydown', handleIntroKey)
   }
 })
@@ -90,8 +90,10 @@ onBeforeUnmount(() => {
         <div class="intro-screen__wheat intro-screen__wheat--right">✦</div>
         <div class="intro-screen__content">
           <p class="intro-screen__eyebrow font-body">✦ 旅途 · 麦香 · 算计 ✦</p>
+          <div class="intro-screen__logo" aria-label="星野文记">
+            <span v-for="(letter, index) in '星野文记'.split('')" :key="letter" :style="{ '--i': index }">{{ letter }}</span>
+          </div>
           <div class="intro-screen__rule" />
-          <h1 class="intro-screen__title font-display">星野文记</h1>
           <p class="intro-screen__subtitle font-serif">把沿途见闻，写成一册温柔的手记</p>
           <button type="button" class="intro-screen__enter font-body" @click="closeIntro">
             踏上旅途 <span>→</span>
@@ -208,12 +210,23 @@ onBeforeUnmount(() => {
   background: linear-gradient(90deg, transparent, #d9bca6, transparent);
 }
 
-.intro-screen__title {
+.intro-screen__logo {
+  display: flex;
+  gap: clamp(0.25rem, 1.5vw, 0.8rem);
   margin: 0;
   color: #f6dfc8;
+  font-family: var(--font-display);
   font-size: clamp(2.7rem, 8vw, 5.6rem);
-  letter-spacing: 0.18em;
+  letter-spacing: 0.05em;
   text-shadow: 0 0 2rem rgba(245, 200, 66, 0.16);
+
+  span {
+    display: inline-block;
+    opacity: 0;
+    filter: blur(0.5rem);
+    transform: translateY(-1.8rem) rotate(calc((var(--i) - 2) * 16deg)) scale(0.72);
+    animation: introLogoIn 1.05s calc(0.18s + var(--i) * 0.24s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
 }
 
 .intro-screen__subtitle {
@@ -264,6 +277,7 @@ onBeforeUnmount(() => {
 @keyframes introRise { from { opacity: 0; transform: translateY(1.5rem) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes introSun { from { opacity: 0; transform: scale(0.72); } to { opacity: 1; transform: scale(1); } }
 @keyframes introFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-0.7rem) rotate(12deg); } }
+@keyframes introLogoIn { 0% { opacity: 0; filter: blur(0.5rem); transform: translateY(-1.8rem) rotate(calc((var(--i) - 2) * 16deg)) scale(0.72); } 62% { opacity: 1; filter: blur(0); } 100% { opacity: 1; filter: blur(0); transform: translateY(0) rotate(0) scale(1); } }
 
 .intro-enter-active,
 .intro-leave-active { transition: opacity 0.7s ease, transform 0.7s ease; }
