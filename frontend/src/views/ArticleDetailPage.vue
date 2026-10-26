@@ -33,6 +33,7 @@ const bookmarked = ref(false)
 const copied = ref(false)
 const lightboxSrc = ref('')
 const lightboxAlt = ref('')
+const showTopButton = ref(false)
 
 const markdownDoc = computed(() =>
   renderMarkdownDocument(post.value?.body || post.value?.excerpt || ''),
@@ -44,6 +45,11 @@ function updateProgress() {
   const root = document.documentElement
   const max = root.scrollHeight - root.clientHeight
   readingProgress.value = max > 0 ? Math.min(100, Math.round((window.scrollY / max) * 100)) : 0
+  showTopButton.value = window.scrollY > 520
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function applyArticleEnhancements() {
@@ -229,6 +235,17 @@ watch(bodyHtml, applyArticleEnhancements)
 <template>
   <div class="page-shell detail">
     <div class="detail__progress" :style="{ width: `${readingProgress}%` }" aria-hidden="true" />
+    <Transition name="page-transition">
+      <button
+        v-if="showTopButton"
+        type="button"
+        class="detail__top-button font-body"
+        aria-label="回到顶部"
+        @click="scrollToTop"
+      >
+        ↑<span>回到顶部</span>
+      </button>
+    </Transition>
     <div class="container">
       <div class="detail__toolbar">
         <button type="button" class="detail__back font-body" @click="goBack">
@@ -396,6 +413,35 @@ watch(bodyHtml, applyArticleEnhancements)
   background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
   transition: width 0.12s ease-out;
   animation: progressGlow 2.4s ease-in-out infinite;
+}
+
+.detail__top-button {
+  position: fixed;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: 1.5rem;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  color: var(--color-secondary);
+  background: color-mix(in srgb, var(--color-nav-bg) 88%, transparent);
+  box-shadow: 0 0.6rem 1.6rem rgba(30, 12, 14, 0.2);
+  backdrop-filter: blur(12px);
+  transition: color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+
+  span {
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+  }
+
+  &:hover {
+    color: var(--color-fg);
+    border-color: var(--color-secondary);
+    transform: translateY(-3px);
+  }
 }
 
 .detail__toolbar {

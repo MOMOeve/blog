@@ -12,6 +12,27 @@ let timer: ReturnType<typeof setInterval> | null = null
 
 const current = computed(() => HERO_WALLPAPERS[index.value] ?? HERO_WALLPAPERS[0])
 const canRotate = HERO_WALLPAPERS.length > 1
+const hero = ref<HTMLElement | null>(null)
+const pointerX = ref(0)
+const pointerY = ref(0)
+
+const heroStyle = computed(() => ({
+  '--hero-x': `${pointerX.value}px`,
+  '--hero-y': `${pointerY.value}px`,
+}))
+
+function handlePointer(event: MouseEvent) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  const rect = hero.value?.getBoundingClientRect()
+  if (!rect) return
+  pointerX.value = ((event.clientX - rect.left) / rect.width - 0.5) * -12
+  pointerY.value = ((event.clientY - rect.top) / rect.height - 0.5) * -8
+}
+
+function resetPointer() {
+  pointerX.value = 0
+  pointerY.value = 0
+}
 
 onMounted(() => {
   if (!canRotate) return
@@ -39,7 +60,7 @@ const particles = [
 </script>
 
 <template>
-  <section class="hero">
+  <section ref="hero" class="hero" :style="heroStyle" @mousemove="handlePointer" @mouseleave="resetPointer">
     <div class="hero__bg" :class="{ 'is-fading': fading }">
       <img class="hero__wallpaper" :src="current" alt="首页壁纸" />
     </div>
@@ -146,6 +167,8 @@ const particles = [
   object-position: center;
   display: block;
   filter: saturate(1.08) brightness(0.72);
+  transform: translate3d(var(--hero-x, 0), var(--hero-y, 0), 0) scale(1.045);
+  transition: transform 0.35s ease-out;
 }
 
 .hero__grad-v {
@@ -190,6 +213,8 @@ const particles = [
   padding: 0 2rem 5rem;
   max-width: var(--max-width);
   margin: 0 auto;
+  transform: translate3d(calc(var(--hero-x, 0) * -0.18), calc(var(--hero-y, 0) * -0.18), 0);
+  transition: transform 0.35s ease-out;
 }
 
 .hero__copy {
