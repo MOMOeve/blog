@@ -565,6 +565,62 @@ function goToPage(page: number) {
   }
 }
 
+@media (max-width: 639px) {
+  .articles__controls {
+    gap: 0.85rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.1rem;
+  }
+
+  .articles__cats {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+
+    .filter-btn { flex: 0 0 auto; }
+  }
+
+  .articles__tools {
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .articles__search {
+    flex: 1;
+    min-width: 0;
+
+    input { width: 100%; }
+  }
+
+  .articles__grid { gap: 1rem; }
+
+  .grid-card__media { height: 9.5rem; }
+  .grid-card__body { padding: 1rem; }
+
+  .list-row {
+    gap: 0.85rem;
+    padding: 1.1rem 0.25rem;
+    margin: 0 -0.25rem;
+  }
+
+  .list-row__thumb {
+    width: 5rem;
+    height: 3.5rem;
+  }
+
+  .list-row__meta {
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.35rem;
+  }
+
+  .list-row__body > .font-body { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+}
+
 select {
   background: rgba(126, 184, 247, 0.04);
   border: 1px solid rgba(126, 184, 247, 0.12);

@@ -125,6 +125,31 @@ onMounted(async () => {
   }
 }
 
+@media (max-width: 639px) {
+  .home {
+    padding: 3rem 1.25rem;
+  }
+
+  .home__featured { margin-bottom: 2.75rem; }
+  .home__divider { margin-bottom: 2.25rem; }
+
+  .home__toolbar {
+    align-items: flex-start;
+    margin-bottom: 1.35rem;
+  }
+
+  .home__filters {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+    .filter-btn { flex: 0 0 auto; }
+  }
+}
+
 .home__featured-head {
   text-align: center;
   margin-bottom: 2.5rem;

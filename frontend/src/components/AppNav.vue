@@ -265,6 +265,22 @@ function onSearchKeydown(e: KeyboardEvent) {
   justify-content: space-between;
 }
 
+@media (max-width: 479px) {
+  .nav__inner {
+    height: 3.6rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .nav__brand {
+    font-size: 0.9rem;
+    letter-spacing: 0.14em;
+  }
+
+  .nav__actions { gap: 0.45rem; }
+  .nav__icon-btn { padding: 0.3rem; }
+}
+
 .nav__logo {
   display: flex;
   align-items: center;
@@ -422,6 +438,7 @@ function onSearchKeydown(e: KeyboardEvent) {
   width: 100%;
   text-align: left;
   padding: 0.75rem 1.5rem;
+  min-height: 2.75rem;
   font-size: 0.875rem;
   letter-spacing: 0.1em;
   color: var(--color-muted-fg);
