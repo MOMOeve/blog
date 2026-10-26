@@ -110,9 +110,23 @@ onMounted(async () => {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 4rem 1.5rem;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 2.5rem;
+    background: linear-gradient(var(--color-secondary), transparent);
+    transform: translateX(-50%);
+    opacity: 0.6;
+  }
 }
 
 .home__featured-head {
+  text-align: center;
   margin-bottom: 2.5rem;
 
   p {
@@ -124,9 +138,9 @@ onMounted(async () => {
   }
 
   h2 {
-    font-size: 1.125rem;
+    font-size: clamp(1.4rem, 3vw, 2rem);
     color: var(--color-fg);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.16em;
     margin: 0;
   }
 }
@@ -155,6 +169,13 @@ onMounted(async () => {
   flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 2rem;
+
+  &::before {
+    content: '—';
+    color: var(--color-secondary);
+    opacity: 0.7;
+    margin-right: 0.5rem;
+  }
 
   h2 {
     font-size: 1rem;

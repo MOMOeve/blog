@@ -147,6 +147,15 @@ const particles = [
   height: 92vh;
   min-height: 600px;
   overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 1rem;
+    z-index: 4;
+    border: 1px solid rgba(243, 232, 226, 0.14);
+    pointer-events: none;
+  }
 }
 
 .hero__bg {
@@ -209,8 +218,9 @@ const particles = [
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 0 2rem 5rem;
+  justify-content: center;
+  align-items: center;
+  padding: 5rem 2rem 4rem;
   max-width: var(--max-width);
   margin: 0 auto;
   transform: translate3d(calc(var(--hero-x, 0) * -0.18), calc(var(--hero-y, 0) * -0.18), 0);
@@ -219,6 +229,7 @@ const particles = [
 
 .hero__copy {
   max-width: 42rem;
+  text-align: center;
 }
 
 .hero__eyebrow {
@@ -248,7 +259,7 @@ const particles = [
   font-size: 1rem;
   line-height: 1.8;
   font-weight: 300;
-  margin: 0 0 2rem;
+  margin: 0 auto 2rem;
   max-width: 32rem;
 }
 
@@ -256,6 +267,7 @@ const particles = [
   display: flex;
   align-items: center;
   gap: 1.25rem;
+  justify-content: center;
 
   span {
     font-size: 0.75rem;
