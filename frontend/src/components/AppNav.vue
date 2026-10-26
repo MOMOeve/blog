@@ -307,7 +307,8 @@ function onSearchKeydown(e: KeyboardEvent) {
   }
 
   &.is-active {
-    color: var(--color-primary);
+    color: var(--color-fg);
+    text-shadow: 0 0 1rem color-mix(in srgb, var(--color-secondary) 35%, transparent);
   }
 }
 
@@ -316,9 +317,10 @@ function onSearchKeydown(e: KeyboardEvent) {
   left: 0;
   right: 0;
   bottom: -2px;
-  height: 1px;
-  background: var(--color-primary);
-  opacity: 0.7;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-secondary), transparent);
+  box-shadow: 0 0 0.7rem color-mix(in srgb, var(--color-secondary) 55%, transparent);
+  opacity: 0.9;
 }
 
 .nav__actions {

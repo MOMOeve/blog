@@ -456,23 +456,39 @@ img {
   font-family: var(--font-body);
   font-size: 0.75rem;
   letter-spacing: 0.15em;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--color-border);
+  position: relative;
+  padding: 0.5rem 0.15rem 0.65rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
   background: transparent;
   color: var(--color-muted-fg);
   transition: color 0.22s ease, border-color 0.22s ease, background 0.22s ease, transform 0.22s ease;
 
   &:hover {
-    border-color: var(--color-border-strong);
+    border-color: color-mix(in srgb, var(--color-secondary) 55%, transparent);
     color: var(--color-fg);
     background: var(--color-surface-deep);
     transform: translateY(-1px);
   }
 
   &.is-active {
-    background: var(--color-primary-soft);
-    border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
-    color: var(--color-primary);
+    background: transparent;
+    border-bottom-color: var(--color-secondary);
+    color: var(--color-fg);
+    text-shadow: 0 0 1rem color-mix(in srgb, var(--color-secondary) 35%, transparent);
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -0.22rem;
+      width: 0.28rem;
+      height: 0.28rem;
+      border-radius: 50%;
+      background: var(--color-secondary);
+      box-shadow: 0 0 0.6rem color-mix(in srgb, var(--color-secondary) 65%, transparent);
+      transform: translateX(-50%);
+    }
   }
 
   &:active { transform: translateY(0); }
