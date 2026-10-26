@@ -29,15 +29,15 @@ watch(
 const showImage = computed(() => Boolean(props.src?.trim()) && !failed.value)
 
 const PALETTE = [
-  ['#0a1628', '#1a3a5c', '#7eb8f7'],
-  ['#1a0f08', '#8b4513', '#f5c842'],
-  ['#12101a', '#3d2a4a', '#c4a0d8'],
-  ['#0d0818', '#2a1840', '#ff6b9d'],
-  ['#060a14', '#1a2840', '#4a90d9'],
-  ['#101820', '#3a4a58', '#a8b8c8'],
-  ['#1a0a08', '#c45c20', '#f5c842'],
-  ['#080610', '#1a0a28', '#00e5ff'],
-  ['#0a1520', '#2a4a6a', '#e8f0f8'],
+  ['#211316', '#4b2728', '#9a6d50'],
+  ['#281714', '#5a3323', '#ae8655'],
+  ['#1e171c', '#44303e', '#987b82'],
+  ['#24161d', '#4a2938', '#95606b'],
+  ['#19171a', '#343039', '#806c67'],
+  ['#21191a', '#493337', '#a18478'],
+  ['#291816', '#633c2d', '#b18c5d'],
+  ['#1c151b', '#3d2835', '#866b76'],
+  ['#21181a', '#4a302b', '#a0785d'],
 ] as const
 
 function hashSeed(value: string): number {
@@ -108,7 +108,7 @@ function onError() {
     border-radius: 50%;
     right: 12%;
     top: 14%;
-    background: rgba(240, 244, 255, 0.18);
+    background: rgba(244, 220, 188, 0.09);
     pointer-events: none;
   }
 }
@@ -120,7 +120,7 @@ function onError() {
   text-align: center;
   font-size: clamp(0.85rem, 2.2vw, 1.15rem);
   letter-spacing: 0.12em;
-  color: rgba(240, 244, 255, 0.92);
+  color: rgba(247, 232, 220, 0.76);
   line-height: 1.4;
 }
 </style>

@@ -86,7 +86,7 @@ function truncate(text: string, len: number) {
     inset: 0;
     pointer-events: none;
     border: 1px solid transparent;
-    background: linear-gradient(110deg, transparent 25%, rgba(217, 188, 166, 0.16) 50%, transparent 75%) border-box;
+    background: linear-gradient(110deg, transparent 25%, rgba(217, 188, 166, 0.07) 50%, transparent 75%) border-box;
     mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
     opacity: 0;
@@ -95,7 +95,7 @@ function truncate(text: string, len: number) {
 
   &:hover {
     border-color: color-mix(in srgb, var(--color-secondary) 52%, var(--color-border));
-    box-shadow: var(--shadow-card), 0 0 2.5rem color-mix(in srgb, var(--color-primary) 18%, transparent);
+    box-shadow: var(--shadow-card), 0 0 1.5rem color-mix(in srgb, var(--color-primary) 10%, transparent);
     transform: translateY(-4px);
 
     &::after {
@@ -136,7 +136,7 @@ function truncate(text: string, len: number) {
   :deep(.media-cover__img),
   :deep(.media-cover__ph) {
     opacity: 0.88;
-    filter: saturate(1.1) brightness(0.95);
+    filter: saturate(0.8) sepia(0.08) brightness(0.82);
     transition: all 0.7s;
   }
 }
@@ -150,7 +150,7 @@ function truncate(text: string, len: number) {
   z-index: 1;
   transition: background 0.35s ease;
 
-  .featured:hover & { background: linear-gradient(135deg, transparent, color-mix(in srgb, var(--color-primary) 12%, transparent)); }
+  .featured:hover & { background: linear-gradient(135deg, transparent, color-mix(in srgb, var(--color-primary) 6%, transparent)); }
 
   @media (min-width: 768px) {
     padding: 3rem;
@@ -272,7 +272,7 @@ function truncate(text: string, len: number) {
   :deep(.media-cover__img),
   :deep(.media-cover__ph) {
     opacity: 0.85;
-    filter: saturate(1.1) brightness(0.92);
+    filter: saturate(0.8) sepia(0.08) brightness(0.82);
     transition: all 0.7s;
   }
 }
