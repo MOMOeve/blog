@@ -5,19 +5,37 @@ const x = ref(-80)
 const y = ref(-80)
 const visible = ref(false)
 const active = ref(false)
+const moving = ref(false)
+const tilt = ref(-8)
 const artworkReady = ref(false)
 const artworkSrc = '/img/cursor-character.png'
+let targetX = -80
+let targetY = -80
+let frame = 0
+let idleTimer: number | undefined
 
 function move(event: MouseEvent) {
-  x.value = event.clientX
-  y.value = event.clientY
+  const dx = event.clientX - targetX
+  targetX = event.clientX
+  targetY = event.clientY
+  if (Math.abs(dx) > 1) tilt.value = Math.max(-16, Math.min(16, dx * 0.45))
   visible.value = true
+  moving.value = true
+  if (idleTimer) window.clearTimeout(idleTimer)
+  idleTimer = window.setTimeout(() => { moving.value = false }, 140)
   const target = event.target as HTMLElement | null
   active.value = Boolean(target?.closest('a, button, [role="button"], input, textarea, select'))
 }
 
 function leave() {
   visible.value = false
+  moving.value = false
+}
+
+function animate() {
+  x.value += (targetX - x.value) * 0.22
+  y.value += (targetY - y.value) * 0.22
+  frame = window.requestAnimationFrame(animate)
 }
 
 onMounted(() => {
@@ -26,19 +44,22 @@ onMounted(() => {
   artwork.src = artworkSrc
   window.addEventListener('mousemove', move, { passive: true })
   document.documentElement.addEventListener('mouseleave', leave)
+  frame = window.requestAnimationFrame(animate)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', move)
   document.documentElement.removeEventListener('mouseleave', leave)
+  window.cancelAnimationFrame(frame)
+  if (idleTimer) window.clearTimeout(idleTimer)
 })
 </script>
 
 <template>
   <div
     class="traveler-cursor"
-    :class="{ 'is-visible': visible, 'is-active': active }"
-    :style="{ transform: `translate3d(${x}px, ${y}px, 0)` }"
+    :class="{ 'is-visible': visible, 'is-active': active, 'is-moving': moving }"
+    :style="{ transform: `translate3d(${x}px, ${y}px, 0)`, '--cursor-tilt': `${tilt}deg` }"
     aria-hidden="true"
   >
     <span class="traveler-cursor__halo" />
@@ -77,7 +98,8 @@ onBeforeUnmount(() => {
   border: 1px solid color-mix(in srgb, var(--color-secondary) 55%, transparent);
   border-radius: 50%;
   opacity: 0.5;
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  animation: cursorHalo 3.2s ease-in-out infinite;
 }
 
 .traveler-cursor__figure {
@@ -87,8 +109,10 @@ onBeforeUnmount(() => {
   width: 1.1rem;
   height: 1.45rem;
   filter: drop-shadow(0 0.18rem 0.25rem rgba(30, 12, 14, 0.32));
-  transform: rotate(-8deg);
-  transition: transform 0.25s ease;
+  transform: rotate(var(--cursor-tilt, -8deg));
+  transform-origin: 50% 90%;
+  transition: transform 0.2s ease-out;
+  animation: cursorBob 2.2s ease-in-out infinite;
 }
 
 .traveler-cursor__artwork {
@@ -100,8 +124,10 @@ onBeforeUnmount(() => {
   max-width: none;
   display: block;
   object-fit: contain;
-  transform: translate(-0.12rem, -0.12rem);
+  transform: translate(-0.12rem, -0.12rem) rotate(var(--cursor-tilt, 0deg));
   filter: drop-shadow(0 0.18rem 0.25rem rgba(30, 12, 14, 0.32));
+  transform-origin: 50% 90%;
+  animation: cursorBob 2.2s ease-in-out infinite;
 }
 
 .traveler-cursor:has(.traveler-cursor__artwork) .traveler-cursor__figure { display: none; }
@@ -167,6 +193,26 @@ onBeforeUnmount(() => {
 }
 
 .traveler-cursor.is-active .traveler-cursor__figure { transform: rotate(4deg) scale(1.08); }
+
+.traveler-cursor.is-active .traveler-cursor__artwork {
+  filter: drop-shadow(0 0.2rem 0.3rem rgba(30, 12, 14, 0.4));
+  animation-duration: 1.25s;
+}
+
+.traveler-cursor.is-moving .traveler-cursor__artwork,
+.traveler-cursor.is-moving .traveler-cursor__figure {
+  animation-duration: 0.72s;
+}
+
+@keyframes cursorBob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -0.12rem; }
+}
+
+@keyframes cursorHalo {
+  0%, 100% { scale: 0.94; opacity: 0.38; }
+  50% { scale: 1.04; opacity: 0.58; }
+}
 
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
   .traveler-cursor { display: none; }
