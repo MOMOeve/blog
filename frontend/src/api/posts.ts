@@ -65,6 +65,13 @@ export async function fetchPostComments(postId: number): Promise<Comment[]> {
   return apiFetch(`/posts/${postId}/comments/`)
 }
 
+export async function moderateComment(postId: number, commentId: number, approved: boolean): Promise<Comment> {
+  return apiFetch(`/posts/${postId}/comments/${commentId}/`, {
+    method: 'PATCH',
+    body: JSON.stringify({ approved }),
+  })
+}
+
 export async function createComment(postId: number, body: string): Promise<Comment & { detail?: string }> {
   return apiFetch(`/posts/${postId}/comments/`, {
     method: 'POST',

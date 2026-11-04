@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Category, Post, Tag
+from .permissions import can_moderate_comments
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -61,9 +62,14 @@ class PostDetailSerializer(PostListSerializer):
     related = serializers.SerializerMethodField()
     prev = serializers.SerializerMethodField()
     next = serializers.SerializerMethodField()
+    canModerateComments = serializers.SerializerMethodField()
 
     class Meta(PostListSerializer.Meta):
-        fields = PostListSerializer.Meta.fields + ['body', 'liked', 'related', 'prev', 'next']
+        fields = PostListSerializer.Meta.fields + ['body', 'liked', 'related', 'prev', 'next', 'canModerateComments']
+
+    def get_canModerateComments(self, obj: Post) -> bool:
+        request = self.context.get('request')
+        return can_moderate_comments(getattr(request, 'user', None), obj)
 
     def get_liked(self, obj: Post) -> bool:
         request = self.context.get('request')

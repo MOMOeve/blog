@@ -4,6 +4,7 @@ import {
   createComment,
   fetchPost,
   fetchPostComments,
+  moderateComment,
   togglePostLike,
 } from '../api/posts'
 import type { Comment, PostDetail } from '../types'
@@ -14,7 +15,7 @@ import MediaCover from '../components/MediaCover.vue'
 import PostCard from '../components/PostCard.vue'
 import { updatePageSeo } from '../utils/seo'
 
-const { isAuthor, isStaff, isLoggedIn, openLogin } = useAuth()
+const { user, isAuthor, isLoggedIn, openLogin } = useAuth()
 const { route, push, paths } = useRouter()
 
 const postKey = computed(() => route.value.params.id || '')
@@ -28,12 +29,17 @@ const commentBody = ref('')
 const commentSending = ref(false)
 const commentMessage = ref('')
 const commentError = ref('')
+const commentsLoading = ref(false)
+const commentsLoadError = ref('')
+const moderating = ref<number | null>(null)
+const moderationError = ref('')
 const readingProgress = ref(0)
 const bookmarked = ref(false)
 const copied = ref(false)
 const lightboxSrc = ref('')
 const lightboxAlt = ref('')
 const showTopButton = ref(false)
+let loadVersion = 0
 
 const markdownDoc = computed(() =>
   renderMarkdownDocument(post.value?.body || post.value?.excerpt || ''),
@@ -135,15 +141,44 @@ function formatCommentTime(iso: string) {
 }
 
 async function loadComments() {
-  if (!postKey.value) return
+  if (!post.value) return
+  const postId = post.value.id
+  const userId = user.value?.id
+  commentsLoading.value = true
+  commentsLoadError.value = ''
   try {
-    comments.value = await fetchPostComments(Number(post.value?.id || postKey.value))
+    const result = await fetchPostComments(postId)
+    if (post.value?.id === postId && user.value?.id === userId) comments.value = result
   } catch {
-    comments.value = []
+    if (post.value?.id === postId && user.value?.id === userId) {
+      comments.value = []
+      commentsLoadError.value = '评论加载失败，请重试'
+    }
+  } finally {
+    commentsLoading.value = false
+  }
+}
+
+async function handleModeration(comment: Comment) {
+  if (!post.value?.canModerateComments || moderating.value !== null) return
+  const postId = post.value.id
+  const userId = user.value?.id
+  moderating.value = comment.id
+  moderationError.value = ''
+  try {
+    const updated = await moderateComment(postId, comment.id, !comment.approved)
+    if (post.value?.id === postId && user.value?.id === userId) {
+      comments.value = comments.value.map((item) => item.id === updated.id ? updated : item)
+    }
+  } catch (e) {
+    moderationError.value = e instanceof Error ? e.message : '审核失败，请重试'
+  } finally {
+    moderating.value = null
   }
 }
 
 async function load() {
+  const version = ++loadVersion
   if (!postKey.value) {
     error.value = '无效的文章链接'
     loading.value = false
@@ -152,8 +187,13 @@ async function load() {
   loading.value = true
   error.value = ''
   post.value = null
+  comments.value = []
+  moderationError.value = ''
+  commentMessage.value = ''
   try {
-    post.value = await fetchPost(postKey.value)
+    const result = await fetchPost(postKey.value)
+    if (version !== loadVersion) return
+    post.value = result
     bookmarked.value = localStorage.getItem(`blog-bookmark:${post.value.id}`) === '1'
     updatePageSeo({
       title: `${post.value.title} · 星野文记`,
@@ -165,9 +205,9 @@ async function load() {
     await loadComments()
     applyArticleEnhancements()
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '加载失败'
+    if (version === loadVersion) error.value = e instanceof Error ? e.message : '加载失败'
   } finally {
-    loading.value = false
+    if (version === loadVersion) loading.value = false
   }
 }
 
@@ -226,6 +266,11 @@ onMounted(() => {
 onBeforeUnmount(() => window.removeEventListener('scroll', updateProgress))
 
 watch(postKey, () => {
+  void load()
+})
+
+watch(() => user.value?.id, () => {
+  comments.value = []
   void load()
 })
 
@@ -358,20 +403,34 @@ watch(bodyHtml, applyArticleEnhancements)
 
         <section class="detail__comments">
           <h2 class="font-display">评论</h2>
+          <p v-if="moderationError" role="alert" class="detail__comment-msg is-error font-body">{{ moderationError }}</p>
+          <p v-if="commentsLoading" class="detail__comment-empty font-body">评论加载中…</p>
+          <p v-if="commentsLoadError" role="alert" class="detail__comment-msg is-error font-body">
+            {{ commentsLoadError }} <button type="button" @click="loadComments">重试</button>
+          </p>
 
           <div v-if="comments.length" class="detail__comment-list">
             <article v-for="c in comments" :key="c.id" class="detail__comment">
               <div class="detail__comment-head">
                 <span class="font-display">{{ c.authorName }}</span>
                 <span class="font-body">{{ formatCommentTime(c.createdAt) }}</span>
-                <span v-if="isStaff && c.approved === false" class="detail__pending font-body">
+                <span v-if="post.canModerateComments && c.approved === false" class="detail__pending font-body">
                   待审核
                 </span>
               </div>
               <p class="font-body">{{ c.body }}</p>
+              <button
+                v-if="post.canModerateComments"
+                type="button"
+                class="detail__moderate font-body"
+                :disabled="moderating !== null"
+                @click="handleModeration(c)"
+              >
+                {{ moderating === c.id ? '处理中…' : c.approved ? '撤回公开' : '通过' }}
+              </button>
             </article>
           </div>
-          <p v-else class="detail__comment-empty font-body">暂无评论，来抢沙发吧。</p>
+          <p v-else-if="!commentsLoading && !commentsLoadError" class="detail__comment-empty font-body">暂无评论，来抢沙发吧。</p>
 
           <div class="detail__comment-form">
             <textarea
@@ -822,6 +881,16 @@ watch(bodyHtml, applyArticleEnhancements)
   padding: 0.1rem 0.4rem;
   border: 1px solid rgba(245, 200, 66, 0.35);
   color: var(--color-primary);
+}
+
+.detail__moderate {
+  margin-top: 0.65rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--color-border);
+  color: var(--color-secondary);
+  font-size: 0.75rem;
+
+  &:disabled { opacity: 0.5; cursor: wait; }
 }
 
 .detail__comment-empty {

@@ -802,7 +802,6 @@ select {
     }
 
     img {
-      opacity: 0.82;
       transform: scale(1.02);
     }
   }
@@ -821,9 +820,7 @@ select {
 
   :deep(.media-cover__img),
   :deep(.media-cover__ph) {
-    opacity: 0.75;
-    filter: saturate(0.56) sepia(0.12) brightness(0.72);
-    transition: all 0.7s;
+    transition: transform 0.7s;
   }
 
   span {
@@ -839,13 +836,6 @@ select {
     color: var(--color-secondary);
   }
 
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 40%, rgba(30, 15, 16, 0.78));
-    pointer-events: none;
-  }
 }
 
 .grid-card__body {
@@ -917,9 +907,6 @@ select {
       transform: translateX(4px);
     }
 
-    img {
-      opacity: 0.85;
-    }
   }
 }
 
@@ -930,11 +917,6 @@ select {
   overflow: hidden;
   background: var(--color-card);
 
-  :deep(.media-cover__img),
-  :deep(.media-cover__ph) {
-    opacity: 0.7;
-    transition: opacity 0.4s;
-  }
 }
 
 .list-row__body {

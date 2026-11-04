@@ -138,7 +138,7 @@ class PasswordResetRequestView(APIView):
             PasswordResetToken.objects.create(user=user, token=token, expires_at=expires_at)
 
             reset_path = f'/reset-password?token={token}'
-            reset_url = request.build_absolute_uri(reset_path)
+            reset_url = settings.FRONTEND_BASE_URL.rstrip('/') + reset_path
             send_mail(
                 subject='星野文记 · 重置密码',
                 message=f'请在 1 小时内打开以下链接重置密码：\n\n{reset_url}\n',

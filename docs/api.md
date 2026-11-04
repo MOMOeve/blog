@@ -39,10 +39,11 @@ Base URL 开发环境：通过 Vite 代理到 `http://127.0.0.1:8000`。
 | Method | Path | Auth | 说明 |
 |--------|------|------|------|
 | GET | `/api/v1/posts/` | 否 | 列表；query: `category`, `tag`, `year`, `month`, `search`, `featured`, `published`, `ordering` |
-| GET | `/api/v1/posts/{id}/` | 否 | 详情（含 body、viewCount、likeCount、liked、related、prev、next）；首次访问计阅读 |
+| GET | `/api/v1/posts/{id}/` | 否 | 详情（含 body、viewCount、likeCount、liked、related、prev、next、canModerateComments）；首次访问计阅读 |
 | POST | `/api/v1/posts/{id}/like/` | 否 | 切换点赞；header: `X-Visitor-Id`（匿名去重） |
-| GET | `/api/v1/posts/{id}/comments/` | 否 | 已审核评论列表（staff 可见全部） |
+| GET | `/api/v1/posts/{id}/comments/` | 否 | 已审核评论列表；管理员和文章作者可见该文章待审评论 |
 | POST | `/api/v1/posts/{id}/comments/` | 登录 | body: `{ body }` → 提交评论（默认待审核） |
+| PATCH | `/api/v1/posts/{id}/comments/{comment_id}/` | 文章作者/Staff | 仅接受 `{ "approved": true或false }`，通过或撤回公开 |
 | GET | `/api/v1/posts/tag-cloud/` | 否 | 标签云 `[{ name, count }]` |
 | GET | `/api/v1/posts/archive/` | 否 | 年月归档 `[{ year, month, count }]` |
 | GET | `/api/v1/feed/rss/` | 否 | RSS 2.0 订阅源 |
@@ -55,6 +56,10 @@ Base URL 开发环境：通过 Vite 代理到 `http://127.0.0.1:8000`。
 | DELETE | `/api/v1/posts/{id}/` | 作者/Staff | 删除（作者仅自己的文章） |
 
 Staff 可用 `?published=false` 获取草稿列表；作者可见自己的草稿；`ordering=-updated_at` 按最近修改排序。
+
+文章详情与评论路径均支持数字 ID 或 slug。评论只接受已发布文章；正文长度为 2～2000 个字符。创建返回 201，服务器固定待审；公众不可见待审评论。审核返回更新后评论；非审核者返回 403，跨文章评论 ID 返回 404；非布尔或额外审核字段返回 400。前端根据服务端 `canModerateComments` 显示审核按钮，服务端仍对每次请求验证权限。
+
+找回密码邮件链接以 `FRONTEND_BASE_URL` 为基址，与请求 Host 无关。token 一小时内有效、仅可使用一次；成功重置使该用户其他未使用 token 同时失效。请求接口对存在和不存在的邮箱保持相同响应。
 
 ## Photography (mediahub)
 

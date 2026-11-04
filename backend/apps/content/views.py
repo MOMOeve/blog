@@ -8,6 +8,9 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.decorators import action
 
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 
 
 
@@ -15,7 +18,8 @@ from apps.accounts.permissions import user_can_write_content, user_is_author
 
 
 
-from .comment_serializers import CommentSerializer, CommentWriteSerializer
+from .comment_serializers import CommentModerationSerializer, CommentSerializer, CommentWriteSerializer
+from .permissions import can_moderate_comments
 
 from .models import Category, Comment, Post, Tag
 
@@ -131,7 +135,7 @@ class PostViewSet(viewsets.ModelViewSet):
         return obj
 
     def get_throttles(self):
-        if self.action in {'like', 'comments'}:
+        if self.action in {'like', 'comments', 'moderate_comment'}:
             self.throttle_scope = 'interaction'
             return [ScopedRateThrottle()]
         return super().get_throttles()
@@ -377,61 +381,45 @@ class PostViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=True, methods=['get', 'post'], url_path='comments')
-
+    @extend_schema(methods=['GET'], responses=CommentSerializer(many=True))
+    @extend_schema(methods=['POST'], request=CommentWriteSerializer, responses={201: CommentSerializer})
+    @action(detail=True, methods=['get', 'post'], url_path='comments',
+            permission_classes=[permissions.IsAuthenticatedOrReadOnly])
     def comments(self, request, pk=None):
-
         post = self.get_object()
-
         if request.method == 'GET':
-
-            qs = post.comments.filter(approved=True).select_related('author', 'author__profile')
-
-            if request.user and request.user.is_staff:
-
-                qs = post.comments.select_related('author', 'author__profile').all()
-
+            qs = post.comments.select_related('author', 'author__profile')
+            if not can_moderate_comments(request.user, post):
+                qs = qs.filter(approved=True)
             return Response(CommentSerializer(qs, many=True).data)
 
-
-
-        if not request.user or not request.user.is_authenticated:
-
-            return Response({'detail': '请先登录后再评论'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-
+        if not post.published:
+            raise PermissionDenied('仅支持评论已发布文章')
         serializer = CommentWriteSerializer(data=request.data)
-
         serializer.is_valid(raise_exception=True)
-
         comment = Comment.objects.create(
-
-            post=post,
-
-            author=request.user,
-
-            body=serializer.validated_data['body'],
-
-            approved=False,
-
+            post=post, author=request.user,
+            body=serializer.validated_data['body'], approved=False,
         )
-
         return Response(
-
-            {
-
-                **CommentSerializer(comment).data,
-
-                'detail': '评论已提交，审核通过后将显示',
-
-            },
-
+            {**CommentSerializer(comment).data, 'detail': '评论已提交，审核通过后将显示'},
             status=status.HTTP_201_CREATED,
-
         )
 
-
+    @extend_schema(request=CommentModerationSerializer, responses=CommentSerializer)
+    @action(detail=True, methods=['patch'],
+            url_path=r'comments/(?P<comment_id>\d+)',
+            permission_classes=[permissions.IsAuthenticated])
+    def moderate_comment(self, request, pk=None, comment_id=None):
+        post = self.get_object()
+        if not can_moderate_comments(request.user, post):
+            raise PermissionDenied('无权审核该文章的评论')
+        comment = get_object_or_404(post.comments, pk=comment_id)
+        serializer = CommentModerationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        comment.approved = serializer.validated_data['approved']
+        comment.save(update_fields=['approved'])
+        return Response(CommentSerializer(comment).data)
 
     @action(detail=False, methods=['get'], url_path='categories-list')
 

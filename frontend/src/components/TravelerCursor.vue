@@ -56,22 +56,25 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div
-    class="traveler-cursor"
-    :class="{ 'is-visible': visible, 'is-active': active, 'is-moving': moving }"
-    :style="{ transform: `translate3d(${x}px, ${y}px, 0)`, '--cursor-tilt': `${tilt}deg` }"
-    aria-hidden="true"
-  >
-    <span class="traveler-cursor__halo" />
-    <img v-if="artworkReady" class="traveler-cursor__artwork" :src="artworkSrc" alt="" />
-    <span class="traveler-cursor__figure">
-      <span class="traveler-cursor__ear traveler-cursor__ear--left" />
-      <span class="traveler-cursor__ear traveler-cursor__ear--right" />
-      <span class="traveler-cursor__face"><i /><i /></span>
-      <span class="traveler-cursor__cloak" />
-      <span class="traveler-cursor__tail" />
-    </span>
-  </div>
+  <!-- Escape #app's stacking context so body-level dialogs cannot cover the cursor. -->
+  <Teleport to="body">
+    <div
+      class="traveler-cursor"
+      :class="{ 'is-visible': visible, 'is-active': active, 'is-moving': moving }"
+      :style="{ transform: `translate3d(${x}px, ${y}px, 0)`, '--cursor-tilt': `${tilt}deg` }"
+      aria-hidden="true"
+    >
+      <span class="traveler-cursor__halo" />
+      <img v-if="artworkReady" class="traveler-cursor__artwork" :src="artworkSrc" alt="" />
+      <span class="traveler-cursor__figure">
+        <span class="traveler-cursor__ear traveler-cursor__ear--left" />
+        <span class="traveler-cursor__ear traveler-cursor__ear--right" />
+        <span class="traveler-cursor__face"><i /><i /></span>
+        <span class="traveler-cursor__cloak" />
+        <span class="traveler-cursor__tail" />
+      </span>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped lang="less">

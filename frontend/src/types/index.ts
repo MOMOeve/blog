@@ -24,6 +24,7 @@ export interface PostNavItem {
 }
 
 export interface PostDetail extends Post {
+  canModerateComments: boolean
   body?: string
   liked?: boolean
   related?: Post[]

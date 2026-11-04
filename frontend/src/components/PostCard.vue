@@ -110,7 +110,6 @@ function truncate(text: string, len: number) {
     img,
     :deep(.media-cover__img),
     :deep(.media-cover__ph) {
-      opacity: 0.95;
       transform: scale(1.02);
     }
   }
@@ -135,9 +134,7 @@ function truncate(text: string, len: number) {
 
   :deep(.media-cover__img),
   :deep(.media-cover__ph) {
-    opacity: 0.88;
-    filter: saturate(0.56) sepia(0.12) brightness(0.72);
-    transition: all 0.7s;
+    transition: transform 0.7s;
   }
 }
 
@@ -262,7 +259,6 @@ function truncate(text: string, len: number) {
 
     :deep(.media-cover__img),
     :deep(.media-cover__ph) {
-      opacity: 0.9;
       transform: scale(1.03);
     }
   }
@@ -275,9 +271,7 @@ function truncate(text: string, len: number) {
 
   :deep(.media-cover__img),
   :deep(.media-cover__ph) {
-    opacity: 0.85;
-    filter: saturate(0.56) sepia(0.12) brightness(0.72);
-    transition: all 0.7s;
+    transition: transform 0.7s;
   }
 }
 
