@@ -1,0 +1,18 @@
+<view class="page" wx:if="{{plan}}">
+  <view class="card">
+    <view class="title">{{plan.title}}</view>
+    <view class="muted">方案 ID：{{plan.id}}</view>
+  </view>
+
+  <view class="card" wx:for="{{plan.stages}}" wx:key="name">
+    <view class="stage-name">{{item.name}}</view>
+    <view class="stage-detail">{{item.detail}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title"><text class="dot"></text><text>本周日历</text></view>
+    <view class="cal" wx:for="{{plan.calendar}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <view class="api-note muted">接口：GET /v1/farming/plan/:planId</view>
+</view>

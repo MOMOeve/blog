@@ -1,0 +1,28 @@
+<view class="page">
+  <view class="card head-card">
+    <image wx:if="{{image}}" src="{{image}}" mode="aspectFill" class="shot" />
+    <view class="shot placeholder" wx:else>演示样图</view>
+    <view class="name">{{result.name}}</view>
+    <view class="meta">
+      <text class="tag sev-{{result.severity}}">严重度 {{severityLabel}}</text>
+      <text class="muted">置信度 {{confidence}}</text>
+    </view>
+    <view class="summary">{{result.summary}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title"><text class="dot"></text><text>症状</text></view>
+    <view class="li" wx:for="{{result.symptoms}}" wx:key="*this">· {{item}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title"><text class="dot"></text><text>防治建议</text></view>
+    <view class="treat" wx:for="{{result.treatments}}" wx:key="title">
+      <view class="t-title">{{item.title}}</view>
+      <view class="t-detail">{{item.detail}}</view>
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="goMall" wx:if="{{result.productIds.length}}">去商城选购对症农资</button>
+  <view class="api-note muted">接口：POST /v1/ai/diagnose（见 utils/mock-api.js）</view>
+</view>

@@ -1,0 +1,69 @@
+<view class="page market">
+  <view class="loc-bar" bindtap="onPickLocation">
+    <text class="pin">◎</text>
+    <text class="loc-text">当前位置：{{locationLabel}}</text>
+    <text class="arrow">▾</text>
+  </view>
+
+  <view class="section-title">
+    <text class="dot"></text>
+    <text>刺梨视觉分级</text>
+  </view>
+
+  <view class="upload-card" bindtap="onUploadGrade">
+    <view class="upload-preview" wx:if="{{previewImage}}">
+      <image src="{{previewImage}}" mode="aspectFill" class="preview-img" />
+    </view>
+    <view class="upload-placeholder" wx:else>
+      <view class="fruit-illus">果</view>
+    </view>
+    <view class="upload-hint">
+      <text class="upload-icon">⬆</text>
+      <text class="upload-main">上传刺梨照片，AI 识别等级与参考售价</text>
+      <text class="muted">支持 JPG/PNG，最大 10MB</text>
+    </view>
+  </view>
+
+  <block wx:if="{{gradeResult}}">
+    <view class="section-title result-title">
+      <text class="dot"></text>
+      <text>识别结果</text>
+    </view>
+    <view class="result-row">
+      <view class="result-card">
+        <view class="result-label">等级</view>
+        <view class="result-value">{{gradeResult.grade}}</view>
+        <view class="result-sub">
+          <text wx:for="{{gradeResult.traits}}" wx:key="*this">✓ {{item}} </text>
+        </view>
+      </view>
+      <view class="result-card">
+        <view class="result-label">AI 建议卖价</view>
+        <view class="result-value">¥{{gradeResult.suggestPrice}}/{{gradeResult.unit}}</view>
+        <view class="result-sub muted">市场参考价 · 实时更新</view>
+      </view>
+    </view>
+    <view class="action-row">
+      <button class="btn-secondary action-btn" bindtap="goVerify">对版验货</button>
+      <button class="btn-primary action-btn" bindtap="goListing">去挂售</button>
+    </view>
+  </block>
+
+  <view class="card quotes-card">
+    <view class="row-between">
+      <view class="section-title" style="margin-bottom:0">
+        <text class="dot"></text>
+        <text>附近市场行情（刺梨）</text>
+      </view>
+      <view class="refresh muted" bindtap="loadQuotes">
+        <text>刷新 · {{updatedAt}} 更新</text>
+      </view>
+    </view>
+    <view class="quote-item" wx:for="{{quotes}}" wx:key="id">
+      <text class="q-name">{{item.name}}</text>
+      <text class="q-price">¥{{item.low}} - {{item.high}} / {{item.unit}}</text>
+      <text class="q-trend {{item.trend}}">{{item.trendText}}</text>
+    </view>
+    <view class="more muted">查看更多行情 ›</view>
+  </view>
+</view>

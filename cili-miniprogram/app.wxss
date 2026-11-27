@@ -1,0 +1,110 @@
+/** 刺梨农事 — 浅绿农事风全局样式 */
+page {
+  --cili-green: #2D6A4F;
+  --cili-green-mid: #40916C;
+  --cili-green-soft: #74A892;
+  --cili-green-pale: #D8EADF;
+  --cili-green-bg: #EAF3EC;
+  --cili-cream: #F4F8F3;
+  --cili-card: #FFFFFF;
+  --cili-text: #1F2A24;
+  --cili-text-secondary: #5A6B60;
+  --cili-muted: #8C958C;
+  --cili-border: #D5E3D9;
+  --cili-danger: #C45C4A;
+  --cili-radius: 24rpx;
+  --cili-radius-lg: 32rpx;
+
+  background: var(--cili-cream);
+  color: var(--cili-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue',
+    'Microsoft YaHei', sans-serif;
+  font-size: 28rpx;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+view, text, image, button, input, scroll-view {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24rpx 32rpx 48rpx;
+  background: var(--cili-cream);
+}
+
+.card {
+  background: var(--cili-card);
+  border-radius: var(--cili-radius-lg);
+  padding: 28rpx;
+  box-shadow: 0 8rpx 24rpx rgba(45, 106, 79, 0.06);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--cili-green);
+  margin-bottom: 20rpx;
+}
+
+.section-title .dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: var(--cili-green-mid);
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  padding: 0 36rpx;
+  background: var(--cili-green);
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  padding: 0 36rpx;
+  background: #fff;
+  color: var(--cili-green);
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: 2rpx solid var(--cili-green);
+}
+
+.btn-secondary::after {
+  border: none;
+}
+
+.muted {
+  color: var(--cili-muted);
+  font-size: 24rpx;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}

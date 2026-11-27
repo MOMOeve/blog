@@ -1,0 +1,25 @@
+<view class="page">
+  <scroll-view scroll-x class="tabs">
+    <view
+      class="tab {{active === item.id ? 'on' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onTab"
+    >{{item.label}}</view>
+  </scroll-view>
+
+  <view class="card order" wx:for="{{list}}" wx:key="id">
+    <view class="row-between">
+      <text class="oid">订单 {{item.id}}</text>
+      <text class="status">{{item.statusLabel}}</text>
+    </view>
+    <view class="pname">{{item.productName}}</view>
+    <view class="row-between meta">
+      <text class="muted">{{item.createdAt}} · ×{{item.quantity}}</text>
+      <text class="amount">¥ {{item.amount}}</text>
+    </view>
+  </view>
+
+  <view class="empty muted" wx:if="{{!list.length}}">暂无相关订单</view>
+</view>

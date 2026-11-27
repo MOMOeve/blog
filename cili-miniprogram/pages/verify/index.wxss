@@ -1,0 +1,61 @@
+.upload {
+  height: 320rpx;
+  border-radius: var(--cili-radius-lg);
+  border: 2rpx dashed #B7CEC2;
+  background: #fff;
+  margin-bottom: 28rpx;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+}
+
+.hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  color: var(--cili-green);
+}
+
+.result {
+  margin-top: 28rpx;
+}
+
+.match {
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+.match.ok {
+  color: var(--cili-green);
+}
+
+.match.bad {
+  color: var(--cili-danger);
+}
+
+.variety {
+  margin-bottom: 16rpx;
+  color: var(--cili-text);
+}
+
+.li {
+  padding: 6rpx 0;
+  color: var(--cili-text-secondary);
+}
+
+.li.bad {
+  color: var(--cili-danger);
+}
+
+.api-note {
+  text-align: center;
+  margin-top: 32rpx;
+}
