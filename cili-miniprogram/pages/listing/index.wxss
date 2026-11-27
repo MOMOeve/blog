@@ -1,0 +1,36 @@
+.card {
+  margin-bottom: 32rpx;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid var(--cili-border);
+}
+
+.field:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: var(--cili-text-secondary);
+  font-size: 26rpx;
+}
+
+.input {
+  text-align: right;
+  flex: 1;
+  margin-left: 24rpx;
+  color: var(--cili-text);
+}
+
+.value {
+  color: var(--cili-text);
+}
+
+.api-note {
+  text-align: center;
+  margin-top: 24rpx;
+}

@@ -1,0 +1,36 @@
+.card {
+  margin-bottom: 20rpx;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--cili-green);
+  margin-bottom: 8rpx;
+}
+
+.stage-name {
+  font-weight: 600;
+  color: var(--cili-green);
+  margin-bottom: 8rpx;
+}
+
+.stage-detail {
+  color: var(--cili-text-secondary);
+  line-height: 1.6;
+}
+
+.cal {
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid var(--cili-border);
+  color: var(--cili-text-secondary);
+}
+
+.cal:last-child {
+  border-bottom: none;
+}
+
+.api-note {
+  text-align: center;
+  margin-top: 16rpx;
+}

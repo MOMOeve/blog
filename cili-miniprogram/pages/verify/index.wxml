@@ -1,0 +1,23 @@
+<view class="page">
+  <view class="section-title"><text class="dot"></text><text>上传待验样品</text></view>
+  <view class="upload" bindtap="onPick">
+    <image wx:if="{{image}}" src="{{image}}" mode="aspectFill" class="img" />
+    <view wx:else class="hint">
+      <text>点击拍照 / 选图</text>
+      <text class="muted">与样板品种比对外观一致性</text>
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="onVerify" loading="{{loading}}">开始对版</button>
+
+  <view class="card result" wx:if="{{result}}">
+    <view class="match {{result.matched ? 'ok' : 'bad'}}">
+      {{result.matched ? '对版通过' : '存在差异'}} · 相似度 {{score}}
+    </view>
+    <view class="variety">认定品种：{{result.variety}}</view>
+    <view class="li" wx:for="{{result.notes}}" wx:key="*this">· {{item}}</view>
+    <view class="li bad" wx:for="{{result.riskFlags}}" wx:key="*this">! {{item}}</view>
+  </view>
+
+  <view class="api-note muted">接口：POST /v1/ai/verify（见 utils/mock-api.js）</view>
+</view>

@@ -1,0 +1,67 @@
+<view class="page profile">
+  <view class="hero">
+    <view class="settings-btn" bindtap="onSettings">⚙</view>
+    <view class="user-row">
+      <view class="avatar">梨</view>
+      <view class="user-meta">
+        <view class="uname">
+          <text>刺梨种植户</text>
+          <text class="badge-leaf">叶</text>
+        </view>
+        <view class="utag muted">刺梨种植 · 贵州地区</view>
+      </view>
+    </view>
+    <view class="role-switch">
+      <view
+        class="role {{role === 'farmer' ? 'on' : ''}}"
+        data-role="farmer"
+        bindtap="onSwitchRole"
+      >农民</view>
+      <view
+        class="role {{role === 'buyer' ? 'on' : ''}}"
+        data-role="buyer"
+        bindtap="onSwitchRole"
+      >买家</view>
+    </view>
+  </view>
+
+  <view class="card order-card">
+    <view class="row-between" bindtap="goOrders" data-status="">
+      <text class="block-title">我的订单</text>
+      <text class="muted">查看全部 ›</text>
+    </view>
+    <view class="order-status">
+      <view class="st" bindtap="goOrders" data-status="pending_pay">
+        <view class="st-icon">¥</view>
+        <text>待付款</text>
+      </view>
+      <view class="st" bindtap="goOrders" data-status="pending_ship">
+        <view class="st-icon">车</view>
+        <text>待发货</text>
+      </view>
+      <view class="st" bindtap="goOrders" data-status="pending_recv">
+        <view class="st-icon">箱</view>
+        <text>待收货</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card menu-card">
+    <view class="menu-item" bindtap="goMessages">
+      <text class="menu-icon">信</text>
+      <text class="menu-text">私信消息</text>
+      <view class="badge" wx:if="{{unread}}">{{unread}}</view>
+      <text class="chev">›</text>
+    </view>
+    <view class="menu-item" bindtap="onAddress">
+      <text class="menu-icon">址</text>
+      <text class="menu-text">地址管理</text>
+      <text class="chev">›</text>
+    </view>
+    <view class="menu-item" bindtap="onSettings">
+      <text class="menu-icon">设</text>
+      <text class="menu-text">设置</text>
+      <text class="chev">›</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,60 @@
+<view class="page home">
+  <view class="top-bar">
+    <view class="loc" bindtap="onPickLocation">
+      <text class="loc-pin">◎</text>
+      <text class="loc-text">{{locationLabel}}</text>
+      <text class="loc-arrow">▾</text>
+    </view>
+    <view class="voice-pill" bindtap="onVoiceQa">
+      <text class="mic">◉</text>
+      <text>语音</text>
+    </view>
+  </view>
+
+  <view class="hero-title">
+    <view class="leaf-mark"></view>
+    <text>首页</text>
+  </view>
+
+  <view class="feature-grid">
+    <view class="feature-card" bindtap="goPlantingPlan">
+      <view class="feature-icon">方</view>
+      <view class="feature-name">种植方案</view>
+      <view class="feature-desc">科学指导 按需管理</view>
+    </view>
+    <view class="feature-card" bindtap="onDiagnose">
+      <view class="feature-icon">摄</view>
+      <view class="feature-name">拍照诊病</view>
+      <view class="feature-desc">智能识别 诊断病虫害</view>
+    </view>
+    <view class="feature-card" bindtap="onVoiceQa">
+      <view class="feature-icon">问</view>
+      <view class="feature-name">语音问答</view>
+      <view class="feature-desc">开口提问 快速解答</view>
+    </view>
+  </view>
+
+  <view class="card advice-card" wx:if="{{advice}}">
+    <view class="row-between advice-head" bindtap="goPlantingPlan">
+      <view class="section-title" style="margin-bottom:0">
+        <text class="dot"></text>
+        <text>今日农事建议</text>
+      </view>
+      <text class="chev">›</text>
+    </view>
+    <view class="advice-body">
+      <view class="advice-badge">苗</view>
+      <text class="advice-text">{{advice.content}}</text>
+    </view>
+    <view class="advice-meta muted">
+      <text>{{advice.timeHint}} · {{advice.weather}}</text>
+    </view>
+    <button class="btn-primary advice-btn" bindtap="goPlantingPlan">查看详细方案 ›</button>
+  </view>
+
+  <view class="landscape" aria-hidden="true">
+    <view class="hill hill-1"></view>
+    <view class="hill hill-2"></view>
+    <view class="house"></view>
+  </view>
+</view>

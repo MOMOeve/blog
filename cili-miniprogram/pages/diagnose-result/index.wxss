@@ -1,0 +1,85 @@
+.head-card {
+  margin-bottom: 24rpx;
+}
+
+.shot {
+  width: 100%;
+  height: 280rpx;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.shot.placeholder {
+  background: var(--cili-green-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cili-green-soft);
+}
+
+.name {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--cili-green);
+  margin-bottom: 12rpx;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.tag {
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  background: var(--cili-green-pale);
+  color: var(--cili-green);
+}
+
+.sev-high {
+  background: #f5d6d0;
+  color: var(--cili-danger);
+}
+
+.sev-medium {
+  background: #e8efc8;
+  color: #6b7a2e;
+}
+
+.summary {
+  line-height: 1.65;
+  color: var(--cili-text);
+}
+
+.card {
+  margin-bottom: 24rpx;
+}
+
+.li {
+  padding: 8rpx 0;
+  color: var(--cili-text-secondary);
+}
+
+.treat + .treat {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--cili-border);
+}
+
+.t-title {
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+
+.t-detail {
+  color: var(--cili-text-secondary);
+  font-size: 26rpx;
+}
+
+.api-note {
+  text-align: center;
+  margin-top: 24rpx;
+}

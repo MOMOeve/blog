@@ -1,0 +1,57 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/market/index",
+    "pages/mall/index",
+    "pages/profile/index",
+    "pages/diagnose-result/index",
+    "pages/verify/index",
+    "pages/product-detail/index",
+    "pages/orders/index",
+    "pages/messages/index",
+    "pages/planting-plan/index",
+    "pages/listing/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F4F8F3",
+    "navigationBarTitleText": "刺梨农事助手",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F4F8F3",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#8C958C",
+    "selectedColor": "#2D6A4F",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页",
+        "iconPath": "images/tab-home.png",
+        "selectedIconPath": "images/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/market/index",
+        "text": "行情",
+        "iconPath": "images/tab-market.png",
+        "selectedIconPath": "images/tab-market-active.png"
+      },
+      {
+        "pagePath": "pages/mall/index",
+        "text": "商城",
+        "iconPath": "images/tab-mall.png",
+        "selectedIconPath": "images/tab-mall-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "images/tab-profile.png",
+        "selectedIconPath": "images/tab-profile-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

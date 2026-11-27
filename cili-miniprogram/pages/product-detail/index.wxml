@@ -1,0 +1,30 @@
+<view class="page" wx:if="{{product}}">
+  <view class="hero-thumb">{{product.categoryLabel}}</view>
+  <view class="card">
+    <view class="name">{{product.name}}</view>
+    <view class="spec muted">{{product.spec}}</view>
+    <view class="price-row">
+      <text class="price">¥ {{product.price}}</text>
+      <text class="origin" wx:if="{{product.originPrice}}">¥ {{product.originPrice}}</text>
+    </view>
+    <view class="desc">{{product.desc}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title"><text class="dot"></text><text>用量建议</text></view>
+    <view class="body">{{product.usage}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title"><text class="dot"></text><text>比价参考</text></view>
+    <view class="cmp" wx:for="{{product.compare}}" wx:key="shop">
+      <text>{{item.shop}}</text>
+      <text class="cmp-price">¥ {{item.price}}</text>
+    </view>
+  </view>
+
+  <view class="bottom-bar safe-bottom">
+    <button class="btn-secondary half" bindtap="addCart">加入购物车</button>
+    <button class="btn-primary half" bindtap="buyNow">立即下单</button>
+  </view>
+</view>

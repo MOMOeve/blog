@@ -1,0 +1,21 @@
+<view class="page">
+  <view
+    class="card msg"
+    wx:for="{{list}}"
+    wx:key="id"
+    data-id="{{item.id}}"
+    bindtap="onOpen"
+  >
+    <view class="avatar">{{item.from[0]}}</view>
+    <view class="body">
+      <view class="row-between">
+        <text class="from">{{item.from}}</text>
+        <text class="muted">{{item.time}}</text>
+      </view>
+      <view class="preview">
+        <text class="{{item.unread ? 'unread' : 'muted'}}">{{item.preview}}</text>
+        <view class="dot" wx:if="{{item.unread}}"></view>
+      </view>
+    </view>
+  </view>
+</view>

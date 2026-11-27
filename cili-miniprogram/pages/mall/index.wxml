@@ -1,0 +1,65 @@
+<view class="page mall">
+  <view class="search-bar">
+    <text class="search-icon">⌕</text>
+    <input
+      class="search-input"
+      placeholder="搜农药/肥料/树苗"
+      placeholder-class="ph"
+      value="{{keyword}}"
+      bindinput="onSearch"
+      confirm-type="search"
+    />
+  </view>
+
+  <view class="cats">
+    <view
+      class="cat {{activeCat === item.id ? 'active' : ''}}"
+      wx:for="{{categories}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onCat"
+    >
+      <text class="cat-icon">{{item.icon}}</text>
+      <text>{{item.name}}</text>
+    </view>
+  </view>
+
+  <view class="banner">
+    <view class="banner-text">
+      <view class="banner-title">刺梨种植好帮手</view>
+      <view class="banner-sub">科学种植 · 优质丰产</view>
+      <view class="banner-cta">了解更多 ›</view>
+    </view>
+    <view class="banner-art">梨</view>
+  </view>
+
+  <view class="row-between section-head">
+    <view class="section-title" style="margin-bottom:0">
+      <text class="dot"></text>
+      <text>精选推荐</text>
+    </view>
+    <text class="muted">查看更多 ›</text>
+  </view>
+
+  <view class="product-grid">
+    <view
+      class="product-card"
+      wx:for="{{filtered}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <view class="badge" wx:if="{{item.badge}}">{{item.badge}}</view>
+      <view class="thumb">{{item.categoryLabel}}</view>
+      <view class="pname">{{item.name}}</view>
+      <view class="pspec muted">{{item.spec}}</view>
+      <view class="price-row">
+        <view>
+          <text class="price">¥ {{item.price}}</text>
+          <text class="origin" wx:if="{{item.originPrice}}">¥ {{item.originPrice}}</text>
+        </view>
+        <view class="cart-btn" catchtap="addCart" data-id="{{item.id}}">+</view>
+      </view>
+    </view>
+  </view>
+</view>
